@@ -107,7 +107,19 @@
         const p = audio.play();
         if (p && p.catch) p.catch(() => {});
       } catch (e) { audio = null; }
-      this.oc = { audio, t: 0, roles, idx: 0, ended: false, skipHold: 0 };
+      this.oc = { audio, t: 0, roles, idx: 0, ended: false, skipHold: 0, analyser: null, freq: null, level: 0, shot: -1, cut: 0 };
+      // route the song through an analyser so the OP pulses to the actual music
+      try {
+        const AC = global.AudioContext || global.webkitAudioContext;
+        const ac = (Sound && Sound.ctx) ? Sound.ctx : (AC ? new AC() : null);
+        if (ac && audio) {
+          if (ac.state === 'suspended' && ac.resume) ac.resume();
+          const src = ac.createMediaElementSource(audio);
+          const an = ac.createAnalyser(); an.fftSize = 256; an.smoothingTimeConstant = 0.6;
+          src.connect(an); an.connect(ac.destination);
+          this.oc.analyser = an; this.oc.freq = new Uint8Array(an.frequencyBinCount);
+        }
+      } catch (e) { /* analyser optional */ }
     },
 
     _updateOpenCredits() {
@@ -361,66 +373,152 @@
       this.credits.lines.forEach((l, i) => { const y = this.credits.y + i * 12; if (y > -12 && y < GFX.H + 12) { const big = i < 2 || l === 'duugu & gab'; GFX.text(l, GFX.W / 2, y, { color: big ? '#d8c0b0' : '#9a90a0', size: big ? 12 : 9, align: 'center' }); } });
     },
 
-    // ---- the edgy opening credits visuals ----
+    // ---- anime-OP helpers ----
+    _ocChar(cx, feetY, key, scale, rot, dir, frame, walking, alpha) {
+      const ctx = GFX.ctx; ctx.save(); if (alpha != null) ctx.globalAlpha = alpha;
+      ctx.translate(cx, feetY); if (rot) ctx.rotate(rot);
+      GFX.drawChar(-8 * scale, -16 * scale, DATA.CHARS[key] || DATA.CHARS.clara, dir || 'down', frame || 0, { scale: scale, walking: !!walking });
+      ctx.restore();
+    },
+    _speedLines(cx, cy, t, color, n, inner, outer, alpha) {
+      const ctx = GFX.ctx; ctx.save(); ctx.globalAlpha = alpha == null ? 0.5 : alpha; ctx.strokeStyle = color;
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + (i % 2 ? t * 0.15 : -t * 0.12);
+        const c = Math.cos(a), s = Math.sin(a), r0 = inner + (i % 3) * 7;
+        ctx.lineWidth = (i % 4 === 0) ? 2.4 : 1; ctx.beginPath();
+        ctx.moveTo(cx + c * r0, cy + s * r0); ctx.lineTo(cx + c * outer, cy + s * outer); ctx.stroke();
+      }
+      ctx.restore();
+    },
+    _ocStripes(col, now, alpha) {
+      const ctx = GFX.ctx, W = GFX.W, H = GFX.H; ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = col;
+      ctx.translate(W / 2, H / 2); ctx.rotate(-0.55); const off = (now * 60) % 36;
+      for (let x = -W; x < W; x += 36) ctx.fillRect(x + off, -H, 16, H * 2);
+      ctx.restore();
+    },
+
+    // ---- anime-style opening credits, cut to the song ----
     _renderOpenCredits() {
       const ctx = GFX.ctx, W = GFX.W, H = GFX.H, oc = this.oc;
       const now = (oc.audio && oc.audio.currentTime) ? oc.audio.currentTime : (oc.t / 1000);
       const frac = Math.min(1, now / CREDITS_END_SEC);
-      const intensity = 0.15 + frac * 0.85;          // ramps up toward the chorus
-      const beat = Math.sin(now * 9);                 // fake "pulse"
-      const hard = intensity > 0.55;
+      const intensity = 0.2 + frac * 0.8;
+      // pulse driven by the real song (bass) when available, else a steady beat
+      let level = 0;
+      if (oc.analyser && oc.freq) { oc.analyser.getByteFrequencyData(oc.freq); let s = 0; for (let i = 0; i < 6; i++) s += oc.freq[i]; level = (s / 6) / 255; }
+      const pulse = Math.max(level, (0.5 + 0.5 * Math.sin(now * 8.5)) * 0.5);
 
-      // black/red base + vignette
-      ctx.fillStyle = '#06030a'; ctx.fillRect(0, 0, W, H);
-      const vg = ctx.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, W * 0.7);
-      vg.addColorStop(0, 'rgba(' + (40 + 60 * intensity) + ',6,12,0.55)'); vg.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+      const SH = [
+        { f: 0.00, t: 'eye' },
+        { f: 0.11, t: 'char', c: 'clara', n: 'CLARA', col: '#244a30', dir: 'right' },
+        { f: 0.22, t: 'char', c: 'haze', n: 'HAZE', col: '#222230', dir: 'left' },
+        { f: 0.33, t: 'char', c: 'samson', n: 'SAMSON', col: '#2a3450', dir: 'down' },
+        { f: 0.44, t: 'char', c: 'tung', n: '???', col: '#6a0e16', dir: 'down' },
+        { f: 0.56, t: 'run', c: 'clara' },
+        { f: 0.68, t: 'montage' },
+        { f: 0.80, t: 'faceoff' },
+        { f: 0.90, t: 'title' }
+      ];
+      let si = 0; for (let i = 0; i < SH.length; i++) if (frac >= SH[i].f) si = i;
+      const shot = SH[si], f0 = shot.f, f1 = (SH[si + 1] ? SH[si + 1].f : 1.0);
+      const local = (frac - f0) / Math.max(0.001, (f1 - f0));
+      const ease = local < 0.5 ? 2 * local * local : 1 - Math.pow(-2 * local + 2, 2) / 2;
 
-      // shake everything when it's hard
+      ctx.fillStyle = '#05030a'; ctx.fillRect(0, 0, W, H);
+
+      // global shake to the beat
       ctx.save();
-      const sh = hard ? (Math.random() * 2 - 1) * 3 * intensity : 0;
-      ctx.translate(sh, (Math.random() * 2 - 1) * 2 * intensity);
+      const amt = (1.2 + 3.5 * intensity) * pulse;
+      ctx.translate((Math.random() * 2 - 1) * amt, (Math.random() * 2 - 1) * amt * 0.7);
 
-      // strobe flashes on the "beat"
-      if (hard && beat > 0.85) { ctx.save(); ctx.globalAlpha = 0.18 * intensity; ctx.fillStyle = '#c81020'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
-
-      // glitch slices
-      if (frac > 0.25 && Math.floor(now * 12) % 4 === 0) {
-        for (let i = 0; i < 3 + (intensity * 5 | 0); i++) { const y = Math.random() * H, h = 2 + Math.random() * 7; ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = i % 2 ? '#c81020' : '#15c0c0'; ctx.fillRect(0, y, W, h); ctx.restore(); }
+      if (shot.t === 'eye') {
+        const open = Math.min(1, local * 1.7);
+        const cx = W / 2, cy = H * 0.46, ew = 50, eh = Math.max(1, 28 * open);
+        ctx.fillStyle = '#e9e6df'; ctx.beginPath(); ctx.ellipse(cx, cy, ew, eh, 0, 0, 7); ctx.fill();
+        GFX.circle(cx, cy, Math.min(eh, 16), '#7a1414'); GFX.circle(cx, cy, Math.min(eh, 16) * 0.5, '#140608');
+        GFX.circle(cx - 5, cy - 5, 3, 'rgba(255,255,255,0.85)');
+        ctx.fillStyle = '#05030a'; ctx.fillRect(cx - ew, cy - 30, ew * 2, (1 - open) * 30); ctx.fillRect(cx - ew, cy + open * 28, ew * 2, 30);
+        this._speedLines(cx, cy, now, 'rgba(180,30,40,0.4)', 28, 60, 200, 0.3 * open);
+        GFX.text('ANONYMOUS AGONY II', W / 2, H - 40, { color: 'rgba(220,200,190,' + open + ')', size: 12, align: 'center', shadowColor: '#400' });
+      } else if (shot.t === 'char') {
+        const red = shot.c === 'tung';
+        ctx.fillStyle = ctx.createLinearGradient(0, 0, 0, H); const g = ctx.fillStyle;
+        g.addColorStop(0, red ? '#2a0608' : '#0c0c16'); g.addColorStop(1, '#05030a'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        this._ocStripes(shot.col, now, 0.5);
+        const fx = W * 0.5 + (shot.dir === 'left' ? 40 : -40);
+        this._speedLines(fx, H * 0.5, now, red ? 'rgba(220,30,40,0.5)' : 'rgba(230,230,240,0.35)', 30, 50, 260, 0.4 + 0.3 * pulse);
+        const fromX = shot.dir === 'left' ? W + 60 : -60;
+        const cx = fromX + (W * 0.5 - fromX) * ease;
+        const scale = 6.2 + pulse * 1.2;
+        if (red) { for (let i = 0; i < 5; i++) { const y = Math.random() * H; ctx.save(); ctx.globalAlpha = 0.3; ctx.fillStyle = i % 2 ? '#c81020' : '#10c0b0'; ctx.fillRect(0, y, W, 2 + Math.random() * 6); ctx.restore(); } }
+        this._ocChar(cx, H - 18, shot.c, scale, Math.sin(now * 3) * 0.03, shot.dir, now * 6, false, 1);
+        // name slam from the opposite side
+        const nx = (shot.dir === 'left' ? -40 : W + 40); const tx = (-40 + (W * 0.5 - (-40)) * ease);
+        ctx.save(); ctx.translate(W * 0.5, H * 0.3); ctx.rotate(-0.06);
+        GFX.rect(-90, 8, 180 * Math.min(1, ease * 1.4), 4, red ? '#c81020' : '#e8d0b0');
+        GFX.text(shot.n, 0, -12, { color: red ? '#ff5a5a' : '#f4ead6', size: 22, align: 'center', weight: '700', shadowColor: '#000' });
+        ctx.restore();
+      } else if (shot.t === 'run') {
+        for (let L = 0; L < 3; L++) { const sp = (L + 1) * 90, off = (now * sp) % 48; ctx.save(); ctx.globalAlpha = 0.12 + L * 0.06; ctx.fillStyle = ['#101826', '#161024', '#1a0e14'][L]; for (let x = -48; x < W; x += 48) ctx.fillRect(x + (48 - off), 20 + L * 50, 30, 30); ctx.restore(); }
+        this._speedLines(W * 0.5, H * 0.5, now, 'rgba(230,230,240,0.3)', 20, 40, 240, 0.3);
+        ctx.save(); ctx.globalAlpha = 0.25; for (let i = 0; i < 14; i++) { const y = (i * 17) % H; ctx.fillStyle = '#cfd6e6'; ctx.fillRect(((now * 220 + i * 60) % (W + 40)) - 40, y, 22, 1.5); } ctx.restore();
+        const bob = Math.abs(Math.sin(now * 9)) * -4;
+        this._ocChar(W * 0.5 + Math.sin(now * 1.5) * 24, H - 24 + bob, 'clara', 6, 0.05, 'right', now * 12, true, 1);
+      } else if (shot.t === 'montage') {
+        const cuts = ['clara', 'haze', 'samson', 'tung'];
+        const sub = Math.floor(local * 8); const c = cuts[sub % cuts.length];
+        const cols = ['#3a1020', '#102030', '#0e2a1e', '#2a0a0a'];
+        ctx.fillStyle = cols[sub % cols.length]; ctx.fillRect(0, 0, W, H);
+        this._ocStripes('#000', now, 0.25);
+        this._speedLines(W * 0.5, H * 0.5, now, c === 'tung' ? 'rgba(220,30,40,0.6)' : 'rgba(240,240,255,0.5)', 34, 30, 280, 0.6);
+        this._ocChar(W * 0.5, H - 16, c, 6.5 + pulse, (sub % 2 ? 0.08 : -0.08), c === 'tung' ? 'down' : (sub % 2 ? 'left' : 'right'), now * 8, false, 1);
+        // hard cut flash each sub-beat
+        if ((local * 8) % 1 < 0.18) { ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      } else if (shot.t === 'faceoff') {
+        ctx.fillStyle = '#0a1020'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(W * 0.62, 0); ctx.lineTo(W * 0.38, H); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#2a0608'; ctx.beginPath(); ctx.moveTo(W, 0); ctx.lineTo(W * 0.62, 0); ctx.lineTo(W * 0.38, H); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+        // lightning seam
+        ctx.save(); ctx.strokeStyle = 'rgba(255,240,180,' + (0.5 + 0.5 * pulse) + ')'; ctx.lineWidth = 1.5 + 2 * pulse; ctx.beginPath(); let yy = 0, xx = W * 0.5; ctx.moveTo(xx, 0); while (yy < H) { yy += 14; xx = W * 0.5 + (Math.random() * 2 - 1) * 16; ctx.lineTo(xx, yy); } ctx.stroke(); ctx.restore();
+        this._ocChar(W * 0.27, H - 16, 'clara', 6, 0.05, 'right', now * 6, false, 1);
+        this._ocChar(W * 0.73, H - 16, 'tung', 6.4, -0.05, 'down', now * 6, false, 1);
+      } else if (shot.t === 'title') {
+        const fl = Math.max(0, 1 - local * 3); ctx.fillStyle = 'rgba(255,255,255,' + fl + ')'; ctx.fillRect(0, 0, W, H);
+        const grd = ctx.createRadialGradient(W / 2, H * 0.7, 10, W / 2, H * 0.7, W * 0.7); grd.addColorStop(0, '#2a0810'); grd.addColorStop(1, '#05030a'); ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 26; i++) { const t = now * 30 + i * 53; const x = (i * 41) % W, y = H - ((t + i * 30) % (H + 20)); ctx.save(); ctx.globalAlpha = 0.5; ctx.fillStyle = i % 3 ? '#7a2018' : '#c8501a'; ctx.beginPath(); ctx.arc(x, y, 1, 0, 7); ctx.fill(); ctx.restore(); }
+        this._ocChar(W * 0.5, H - 12, 'clara', 4.5, 0, 'down', 0, false, 0.9);
+        const ts = 1 + Math.max(0, (1 - ease)) * 0.55;
+        ctx.save(); ctx.translate(W / 2, H * 0.34); ctx.scale(ts, ts);
+        GFX.text('ANONYMOUS AGONY II', 0, -16, { color: '#e8d0c0', size: 16, align: 'center', weight: '700', shadowColor: '#400' });
+        GFX.text("CLARA'S REVENGE", 0, 4, { color: '#e01f2c', size: 15, align: 'center', weight: '700', shadowColor: '#200' });
+        ctx.restore();
+        GFX.text('DUUGU · GAB · TAKI', W / 2, H - 30, { color: '#f0e6d0', size: 13, align: 'center', weight: '700', shadowColor: '#500' });
       }
-
-      // Clara silhouette, growing/closer as it builds
-      const sc = 3 + intensity * 4;
-      GFX.ctx.save(); GFX.ctx.globalAlpha = 0.55 + 0.35 * intensity;
-      GFX.drawChar(W / 2 - 8 * sc, H - 16 * sc - 6, DATA.CHARS.clara, 'down', 0, { scale: sc });
-      GFX.ctx.restore();
-
-      // title
-      GFX.text('ANONYMOUS AGONY II', W / 2, 22, { color: '#e8d0c0', size: 14, align: 'center', shadowColor: '#400' });
-      GFX.text("CLARA'S REVENGE", W / 2, 40, { color: '#d61f2c', size: 12, align: 'center', shadowColor: '#200' });
-
-      // rolling role cards — duugu & gab in every role
-      const cardEvery = 3.4;                          // seconds per role card
-      const ri = Math.floor(now / cardEvery) % oc.roles.length;
-      const cardLocal = (now % cardEvery) / cardEvery;
-      const cardA = Math.min(1, (1 - Math.abs(cardLocal - 0.5) * 2) * 2.2);
-      ctx.save(); ctx.globalAlpha = cardA;
-      GFX.text(oc.roles[ri], W / 2, H / 2 + 4, { color: '#bfc0cc', size: 9, align: 'center', weight: '700' });
-      const nm = hard ? 'DUUGU · GAB · TAKI' : 'duugu · gab · taki';
-      GFX.text(nm, W / 2, H / 2 + 18, { color: '#f0e6d0', size: hard ? 13 : 11, align: 'center', weight: '700', shadowColor: '#500' });
-      ctx.restore();
 
       ctx.restore(); // shake
 
-      // gritty overlay — heavier as it builds
-      GFX.edge(this.frame, 0.7 + intensity * 0.6);
-      if (hard && beat > 0.6) { ctx.save(); ctx.globalAlpha = 0.12 * intensity; ctx.fillStyle = '#c81020'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      // hard cut flash at every shot boundary
+      if (local < 0.06) { ctx.save(); ctx.globalAlpha = 0.85 * (1 - local / 0.06); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+      // beat-driven red flash
+      if (pulse > 0.62) { ctx.save(); ctx.globalAlpha = 0.14 * pulse; ctx.fillStyle = '#c81020'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
 
-      // soundtrack credit (title/artist only — no lyrics)
-      GFX.text("♪  'Down With the Sickness' — Disturbed", W / 2, H - 22, { color: 'rgba(210,210,220,' + (0.4 + 0.3 * Math.sin(now * 2)) + ')', size: 8, align: 'center' });
-      GFX.text('Hold X / Esc to skip', W - 6, H - 11, { color: 'rgba(200,200,210,0.5)', size: 7, align: 'right' });
+      GFX.edge(this.frame, 0.7 + intensity * 0.55);
+
+      // rolling role cards (lower third) — except during the title drop
+      if (shot.t !== 'title') {
+        const cardEvery = 3.2; const ri = Math.floor(now / cardEvery) % oc.roles.length;
+        const cl = (now % cardEvery) / cardEvery; const ca = Math.min(1, (1 - Math.abs(cl - 0.5) * 2) * 2.4);
+        ctx.save(); ctx.globalAlpha = ca;
+        GFX.box(W / 2 - 96, H - 44, 192, 30, { alpha: 0.5 });
+        GFX.text(oc.roles[ri], W / 2, H - 40, { color: '#bfc0cc', size: 9, align: 'center', weight: '700' });
+        GFX.text('DUUGU · GAB · TAKI', W / 2, H - 28, { color: '#f0e6d0', size: 12, align: 'center', weight: '700', shadowColor: '#500' });
+        ctx.restore();
+      }
+
+      // attribution + skip
+      GFX.text("♪  'Down With the Sickness' — Disturbed", W / 2, H - 12, { color: 'rgba(210,210,220,' + (0.45 + 0.3 * pulse) + ')', size: 8, align: 'center' });
+      GFX.text('Hold X / Esc to skip', W - 6, 4, { color: 'rgba(200,200,210,0.5)', size: 7, align: 'right' });
       if (oc.skipHold > 0) GFX.rect(0, H - 2, W * Math.min(1, oc.skipHold / 650), 2, '#d44');
-      if (!oc.audio || oc.audio.error) GFX.text('(add ' + CREDITS_SONG_SRC + ')', 6, H - 11, { color: 'rgba(180,120,120,0.6)', size: 7 });
+      if (!oc.audio || oc.audio.error) GFX.text('(add ' + CREDITS_SONG_SRC + ')', 6, 4, { color: 'rgba(180,120,120,0.6)', size: 7 });
     }
   };
 
