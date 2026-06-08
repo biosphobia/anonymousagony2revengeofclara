@@ -38,7 +38,17 @@
       prog: [ch(['C3', 'E3', 'G3']), ch(['A2', 'C3', 'E3']), ch(['D3', 'F3', 'A3']), ch(['G2', 'B2', 'D3'])],
       lead: [[{ n: 'G4', at: 0.4, d: 1.5 }], [{ n: 'E4', at: 0.6, d: 1.6 }], [{ n: 'A4', at: 0.3, d: 1.4 }], [{ n: 'D4', at: 0.8, d: 1.8 }]]
     },
-    keep: { // The Hour Between — dread
+    house: { // inside the house — hushed, wrong
+      chordDur: 5, cutoff: 800, pad: 'sine',
+      prog: [ch(['A2', 'C3', 'E3']), ch(['A2', 'C3', 'F3']), ch(['G2', 'B2', 'E3']), ch(['A2', 'C3', 'E3'])],
+      lead: [[{ n: 'C4', at: 0.6, d: 2.4 }], [], [{ n: 'B3', at: 0.7, d: 2.2 }], []]
+    },
+    room: { // the childhood room — sparse, held breath
+      chordDur: 4, cutoff: 700, pad: 'sine',
+      prog: [ch(['D2', 'A2', 'E3']), ch(['D2', 'A2', 'F3']), ch(['C2', 'G2', 'E3']), ch(['D2', 'A2', 'D3'])],
+      lead: [[{ n: 'A3', at: 0.8, d: 2.0 }], [], [{ n: 'F3', at: 0.6, d: 2.2 }], []]
+    },
+    keep: { // (legacy) dread
       chordDur: 3.5, cutoff: 600, pad: 'sawtooth',
       prog: [ch(['A1', 'Bb1', 'E2']), ch(['A1', 'A2', 'Eb2']), ch(['G1', 'Ab1', 'D2']), ch(['A1', 'Bb1', 'F2'])],
       lead: [[], [{ n: 'Bb3', at: 1.0, d: 1.4 }], [], [{ n: 'A3', at: 0.5, d: 1.8 }]]

@@ -1,101 +1,84 @@
 # Anonymous Agony II: Clara's Revenge
 
-A retro, RPG-Maker-style web RPG. Clara survived the night Ashen Village
-burned. A year later she walks out of the ash to settle a promise with the
-three men who lit the torches.
+A grounded, story-driven **puzzle / exploration** game (no combat) in a
+retro RPG-Maker style, and a direct continuation of *Anonymous Agony*
+(Coded Emotion). Years later, Clara Stratos walks back into the house on
+Maple Street to finally face what was done to her as a child — embodied,
+obliquely, by **Tung Tung Tung Sahur**: a knocking in the dark that hides
+behind silly "Italian brainrot" noise the way her abuser hid behind a
+friendly screen. It is a survivor's story about refusing the blame.
 
-Built as a **single, self-contained HTML5 game** — pure Canvas + vanilla
-JavaScript, with all art, music, and sound generated procedurally in code.
-**No build step, no dependencies, no external assets.**
+> Heavy themes are handled **off-screen and symbolically** — nothing is
+> ever depicted or sexualized. The game is about reclaiming a narrative.
+
+Built as a **single, self-contained HTML5 game**: Canvas + vanilla JS,
+smooth (non-pixel) rendering, code-drawn art, illustrated portraits,
+per-character TTS, and a long animated opening. No build step.
 
 ## Play it
-
-Just open `index.html` in any modern browser:
-
-- Double-click `index.html`, **or**
-- Serve the folder and visit it (e.g. `python3 -m http.server` then open
-  `http://localhost:8000`), **or**
-- Host the folder on any static host (GitHub Pages, Netlify, etc.).
-
-> Tip: it runs straight from the filesystem (`file://`) because the scripts
-> are plain `<script>` tags, not ES modules.
+Open `index.html` in a modern browser, or host the folder anywhere static.
 
 ## Controls
+| Action | Keyboard | Touch |
+|---|---|---|
+| Move | Arrows / WASD | D-pad |
+| Confirm / interact | Z / Enter | A |
+| Cancel / menu | X / Esc | B |
+| Mute | M | — |
+| Toggle voice (TTS) | V | — |
 
-| Action            | Keyboard                | Touch            |
-|-------------------|-------------------------|------------------|
-| Move              | Arrow keys / WASD       | On-screen D-pad  |
-| Confirm / Talk    | Z / Enter / Space       | **A** button     |
-| Cancel / Menu     | X / Esc                 | **B** button     |
-| Run (hold)        | Shift                   | —                |
-| Mute / unmute     | M                       | —                |
+## Flow
+1. **Title → New Game.**
+2. A long, fully **animated opening cinematic** (Clara's backstory and the
+   whole original cast). Hold **X/Esc** to skip.
+3. An **epic vengeance opening-credits roll** (see Soundtrack below),
+   crediting **duugu & gab** for every role. Hold **X/Esc** to skip.
+4. **The game**: explore Maple Street and the house, examine memories,
+   solve light puzzles (find Haze's note, set the hall clock to 3:00),
+   reach **Zede Hospital** for the truth, then open the last locked room
+   and face Tung in a dialogue "naming" climax. Twists tied to Clara's
+   past land along the way.
 
-On phones/tablets a virtual D-pad and A/B buttons appear automatically.
-
-## Features
-
-- **Overworld exploration** across four hand-built maps (village, woods,
-  town, keep) with grid-based movement, a following camera, and NPCs.
-- **Story & cutscenes** driven by a small event interpreter — dialogue with
-  a typewriter effect, branching by story flags, full-screen narration.
-- **Turn-based battles**: command → resolve in speed order, with skills,
-  items, guard, run, criticals, bleed/buff/debuff statuses, and a smart-ish
-  enemy AI.
-- **Progression**: EXP, leveling, learnable skills, a second party member
-  (Roan), gold, an inn, and a shop.
-- **Three bosses** and a proper ending + credits.
-- **Save / load** via `localStorage`, with autosave on area transitions.
-- **Procedural chiptune** soundtrack and SFX via the Web Audio API
-  (toggle with **M**).
-- Crisp pixel rendering (text included) at a 256×192 internal resolution,
-  scaled to fit any screen.
-
-## Walkthrough (no spoilers beyond the obvious)
-
-1. Talk to **Elias** by the well in Ashen Village — he points you south.
-2. Head into the **Whispering Woods**. Tall grass hides random encounters;
-   grind a couple of levels and learn *Rend*.
-3. The **Houndmaster** blocks the forest road. Beat him for the **Iron Key**.
-4. In **Greyhold**, rest at the inn, shop for potions, and recruit **Roan**.
-   Show the Iron Key to the gate guard to open the keep.
-5. In **Vael's Keep**, cut down **Captain Dross**, then **Lord Vael**.
-
-Stuck on a boss? Grind a level or two, keep potions stocked, and use *Guard*
-on turns you expect a big hit. *Mend* (Clara) and *Patch Up* (Roan) keep you
-alive; *Sunder* softens armored foes.
-
-## Project layout
+## Soundtrack (you supply the song)
+The opening credits are meant to run to **"Down With the Sickness" by
+Disturbed**, up to the end of the first chorus. For copyright reasons the
+audio is **not** in this repo — add your own copy at:
 
 ```
-index.html        entry point (loads everything)
-css/style.css     layout, scaling, touch controls
+assets/down-with-the-sickness.mp3
+```
+
+The credits sequence is **synced to the audio's own playback clock**, so
+the visuals match whatever file you drop in. To end exactly at the first
+chorus, set `CREDITS_END_SEC` (seconds) near the top of `js/game.js`. If
+the file is missing, the credits still play (silently) and end on a timer.
+
+## Project layout
+```
+index.html            entry point
+css/style.css         layout / smooth scaling / touch controls
+assets/               <- put the song here
 js/
-  data.js         all content: palette, maps, enemies, items, skills, story
-  audio.js        Web Audio chiptune engine (music + SFX)
-  input.js        keyboard + touch input
-  graphics.js     canvas, pixel text, procedural sprites & tiles
-  dialogue.js     message box (typewriter) + reusable menu
-  battle.js       turn-based battle system
-  world.js        overworld: tiles, movement, camera, NPCs, encounters
-  game.js         state machine, party/leveling, save/load, menus, shop
-  main.js         bootstrap + fixed-timestep loop
-test/headless.js  Node harness that stubs the browser and plays the whole
-                  game start-to-credits to catch runtime regressions
+  data.js             maps, items, characters, the story & puzzle scripts
+  audio.js            ambient soundscape + SFX (Web Audio)
+  voice.js            per-character TTS (Web Speech API)
+  input.js            keyboard + touch
+  graphics.js         smooth rendering, portraits, sprites, tiles
+  dialogue.js         message box (typewriter, portraits) + menus
+  world.js            map: movement, camera, NPCs, props, interaction
+  cinematic.js        animated opening cinematic engine + script
+  game.js            state machine, event/puzzle interpreter, credits, save
+  main.js             bootstrap + loop
+test/headless.js      Node harness: plays the whole game start->credits
 ```
 
 ## Tests
-
-The logic can be exercised headlessly (no browser needed):
-
 ```
 node test/headless.js
 ```
-
-It boots the engine with stubbed browser APIs and auto-plays a full run
-(title → intro → exploration → random battles → all three bosses → ending
-→ credits), asserting story flags, leveling, items, save/load, shop, and
-inn along the way.
+Stubs the browser and auto-plays the full game (skips the cinematic and
+credits, solves the puzzle chain, hits the ending), asserting the story
+flags and twists along the way.
 
 ---
-
-*Anonymous Agony II: Clara's Revenge — a promise kept in ash.*
+*A continuation of Anonymous Agony by Coded Emotion.*
