@@ -10,10 +10,12 @@
 
     global.GFX.init(canvas);
     global.Input.init();
+    if (global.Voice) global.Voice.init();
 
     // Audio needs a user gesture; start it on first input.
     global.Input.onFirstInput = function () {
       global.Sound.resume();
+      if (global.Voice) global.Voice.warm();
       if (global.Game.mode === 'title') global.Sound.playMusic('title');
     };
 

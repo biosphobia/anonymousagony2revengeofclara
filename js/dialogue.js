@@ -23,7 +23,10 @@
       this.page = 0; this._initPage();
     },
 
-    _initPage() { this.revealed = 0; this.total = this.pages[this.page].join('\n').length; this.blink = 0; },
+    _initPage() {
+      this.revealed = 0; this.total = this.pages[this.page].join('\n').length; this.blink = 0;
+      if (global.Voice) global.Voice.speak(this.pages[this.page].join(' '), this.who || 'Narrator');
+    },
     isActive() { return this.active; },
 
     update() {

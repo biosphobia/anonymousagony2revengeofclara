@@ -36,6 +36,7 @@
 
     finish() {
       if (this.ended) return; this.ended = true; this.active = false;
+      if (global.Voice) global.Voice.stop();
       const cb = this.onDone; this.onDone = null; if (cb) cb();
     },
 
@@ -84,10 +85,12 @@
       }
       if (e.say !== undefined) {
         this.caption = { kind: 'say', who: e.say, portrait: e.portrait !== undefined ? e.portrait : (e.say ? DATA.SPEAKER_PORTRAITS[e.say] : null), text: e.text, shown: 0, full: e.text.length };
+        if (global.Voice) global.Voice.speak(e.text, e.say || 'Narrator');
         this.waitDur = e.dur || sayDur(e.text); return true;
       }
       if (e.narrate !== undefined) {
         this.caption = { kind: 'narrate', lines: e.narrate, t: 0 };
+        if (global.Voice) global.Voice.speak(e.narrate.join('. '), 'Narrator');
         const chars = e.narrate.join(' ').length;
         this.waitDur = e.dur || clamp(chars * 60 + 1800, 3200, 11000); return true;
       }
@@ -118,10 +121,12 @@
       if (this.caption && this.caption.kind === 'say') { this.caption.shown += dt * 0.06; if (advance && this.caption.shown < this.caption.full) { this.caption.shown = this.caption.full; return; } }
       if (this.caption && this.caption.kind === 'narrate') this.caption.t += dt;
 
-      // beat timing
+      // beat timing — hold while the line is still being spoken (capped)
       this.t += dt;
-      if (advance) this.t = Math.max(this.t, this.waitDur); // press to advance
-      if (this.t >= this.waitDur) { this.caption = (this.caption && this.caption.persist) ? this.caption : this.caption; this._pump(); }
+      if (advance) { this.t = this.waitDur; if (global.Voice) global.Voice.stop(); }
+      const voicing = !advance && global.Voice && global.Voice.isSpeaking() &&
+        this.caption && (this.caption.kind === 'say' || this.caption.kind === 'narrate');
+      if (this.t >= this.waitDur && (!voicing || this.t >= this.waitDur + 9000)) this._pump();
     },
 
     render() {

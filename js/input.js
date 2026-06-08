@@ -23,8 +23,9 @@
 
     init() {
       global.addEventListener('keydown', (e) => {
-        // Mute toggle handled globally
-        if (e.code === 'KeyM') { if (global.Sound) global.Sound.toggleMute(); }
+        // Mute / voice toggles handled globally
+        if (e.code === 'KeyM') { if (global.Sound) { const m = global.Sound.toggleMute(); if (global.Voice) global.Voice.setMuted(m); } }
+        if (e.code === 'KeyV') { if (global.Voice) global.Voice.toggle(); }
         const b = KEYMAP[e.code];
         if (b) {
           e.preventDefault();

@@ -91,7 +91,7 @@ sandbox.window = sandbox;
 
 // ---- Load engine files in order ----
 const ctx = vm.createContext(sandbox);
-const files = ['data.js', 'audio.js', 'input.js', 'graphics.js', 'dialogue.js', 'battle.js', 'world.js', 'cinematic.js', 'game.js', 'main.js'];
+const files = ['data.js', 'audio.js', 'voice.js', 'input.js', 'graphics.js', 'dialogue.js', 'battle.js', 'world.js', 'cinematic.js', 'game.js', 'main.js'];
 for (const f of files) {
   const code = fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8');
   vm.runInContext(code, ctx, { filename: f });
@@ -262,8 +262,8 @@ try {
   check('won random battles (' + battles + ')', battles >= 4 && Game.mode === 'explore');
   check('clara leveled from grinding', Game.state.party[0].level > lvlStart);
 
-  // heal & resupply, then go beat the houndmaster boss
-  Game.healParty(); stock();
+  // heal & resupply (and a little extra grind), then beat the first boss
+  Game.partyGainExp(180); Game.healParty(); stock();
   check('reach tralalero', talkTo(20, 18));
   resolveStory();
   check('tralalero defeated', !!Game.state.flags.tralalero_dead);
@@ -305,7 +305,7 @@ try {
   resolveStory();
   check('herald defeated', !!Game.state.flags.herald_dead);
 
-  Game.partyGainExp(600); Game.healParty(); stock();
+  Game.partyGainExp(1000); Game.healParty(); stock();
   check('reach tung', talkTo(9, 5));
   resolveStory();
   check('tung defeated', !!Game.state.flags.tung_dead);

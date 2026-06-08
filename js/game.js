@@ -224,7 +224,7 @@
       const e = ev.list[ev.idx++];
 
       if ('say' in e) { Dialogue.start(e.text, e.say, e.say ? (DATA.SPEAKER_PORTRAITS[e.say] || null) : null); ev.waiting = 'dialogue'; return; }
-      if (e.narrate) { this.narration = { lines: e.narrate, t: 0 }; ev.waiting = 'narrate'; return; }
+      if (e.narrate) { this.narration = { lines: e.narrate, t: 0 }; if (global.Voice) global.Voice.speak(e.narrate.join('. '), 'Narrator'); ev.waiting = 'narrate'; return; }
       if (e.setFlag) { this.state.flags[e.setFlag] = e.value; World.refreshEntities(); return this._step(); }
       if ('gold' in e) { this.addGold(e.gold); Sound.sfx('gold'); return this._step(); }
       if (e.give) { this.addItem(e.give, e.n || 1); Sound.sfx('item'); return this._step(); }
@@ -262,6 +262,7 @@
     // Battles
     // -----------------------------------------------------------------
     _startBattle(group, area) {
+      if (global.Voice) global.Voice.stop();
       this.state.party.forEach(p => { p.alive = p.hp > 0; p.status = {}; p.guarding = false; p.hitTimer = 0; p.dieTimer = 0; });
       this.mode = 'battle';
       Battle.start(this.state.party, group, { area }, (res) => this.battleReturn(res));
