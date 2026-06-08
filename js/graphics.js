@@ -469,8 +469,15 @@
     // --------------------------------------------------------------------
     // Portraits — larger, hand-drawn-style busts (non-pixel)
     // --------------------------------------------------------------------
-    drawPortrait(key, x, y, w, h) {
+    drawPortrait(key, x, y, w, h, opt) {
+      opt = opt || {};
       const ctx = this.ctx;
+      const t = opt.t != null ? opt.t : (global.performance ? global.performance.now() : Date.now());
+      const seed = (key && key.charCodeAt(0) || 0) * 137;
+      let open = 0;
+      if (opt.talk) open = Math.min(1, Math.max(0, 0.45 + 0.5 * Math.sin(t / 78) + 0.25 * Math.sin(t / 31 + 1)));
+      const blink = ((t + seed) % 3400) < 130;
+      const anim = { open: open, blink: blink };
       ctx.save();
       // frame
       this._rrPath(x, y, w, h, 4);
@@ -478,17 +485,18 @@
       ctx.save(); this._rrPath(x, y, w, h, 4); ctx.clip();
       const cx = x + w / 2, cy = y + h * 0.52, r = w * 0.30;
       const C = global.DATA.CHARS[key] || {};
-      if (key === 'tung') this._faceTung(cx, cy, r);
-      else if (key === 'tralalero') this._faceTralalero(cx, cy, r);
-      else if (key === 'herald') this._faceHerald(cx, cy, r);
-      else this._faceHuman(cx, cy, r, key, C);
+      if (key === 'tung') this._faceTung(cx, cy, r, anim);
+      else if (key === 'tralalero') this._faceTralalero(cx, cy, r, anim);
+      else if (key === 'herald') this._faceHerald(cx, cy, r, anim);
+      else this._faceHuman(cx, cy, r, key, C, anim);
       ctx.restore();
       // frame stroke
       this._rrPath(x, y, w, h, 4); ctx.lineWidth = 1.2; ctx.strokeStyle = '#8a9bdc'; ctx.stroke();
       ctx.restore();
     },
 
-    _faceHuman(cx, cy, r, key, C) {
+    _faceHuman(cx, cy, r, key, C, anim) {
+      anim = anim || { open: 0, blink: false };
       const ctx = this.ctx;
       const skin = C.skin || '#e7c39c', hair = C.hair || '#3a2a1a', shirt = C.shirt || '#445';
       // shoulders / clothing
@@ -504,15 +512,20 @@
       this.circle(cx - r * 0.9, cy, r * 0.2, skin); this.circle(cx + r * 0.9, cy, r * 0.2, skin);
       // hair behind/top per character
       this._portraitHair(cx, cy, r, key, hair);
-      // eyes
+      // eyes (blink closes them)
       const ex = r * 0.4, ey = cy - r * 0.05, er = r * 0.2;
       const young = (key === 'clara');
-      this.ellipse(cx - ex, ey, er, er * (young ? 1.35 : 1.1), '#ffffff');
-      this.ellipse(cx + ex, ey, er, er * (young ? 1.35 : 1.1), '#ffffff');
-      const iris = key === 'clara' ? '#5a7a3a' : key === 'haze' ? '#3a4a6a' : '#4a3a2a';
-      this.circle(cx - ex, ey + (young ? er * 0.2 : 0), er * 0.62, iris); this.circle(cx + ex, ey + (young ? er * 0.2 : 0), er * 0.62, iris);
-      this.circle(cx - ex, ey + (young ? er * 0.2 : 0), er * 0.3, '#15151c'); this.circle(cx + ex, ey + (young ? er * 0.2 : 0), er * 0.3, '#15151c');
-      this.circle(cx - ex - er * 0.2, ey - er * 0.2, er * 0.16, '#fff'); this.circle(cx + ex - er * 0.2, ey - er * 0.2, er * 0.16, '#fff');
+      if (anim.blink) {
+        ctx.strokeStyle = lerpHex2(skin, '#000', 0.35); ctx.lineWidth = r * 0.11; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(cx - ex - er, ey); ctx.lineTo(cx - ex + er, ey); ctx.moveTo(cx + ex - er, ey); ctx.lineTo(cx + ex + er, ey); ctx.stroke();
+      } else {
+        this.ellipse(cx - ex, ey, er, er * (young ? 1.35 : 1.1), '#ffffff');
+        this.ellipse(cx + ex, ey, er, er * (young ? 1.35 : 1.1), '#ffffff');
+        const iris = key === 'clara' ? '#5a7a3a' : key === 'haze' ? '#3a4a6a' : '#4a3a2a';
+        this.circle(cx - ex, ey + (young ? er * 0.2 : 0), er * 0.62, iris); this.circle(cx + ex, ey + (young ? er * 0.2 : 0), er * 0.62, iris);
+        this.circle(cx - ex, ey + (young ? er * 0.2 : 0), er * 0.3, '#15151c'); this.circle(cx + ex, ey + (young ? er * 0.2 : 0), er * 0.3, '#15151c');
+        this.circle(cx - ex - er * 0.2, ey - er * 0.2, er * 0.16, '#fff'); this.circle(cx + ex - er * 0.2, ey - er * 0.2, er * 0.16, '#fff');
+      }
       // brows
       ctx.strokeStyle = lerpHex2(hair, '#000', 0.1); ctx.lineWidth = r * 0.13; ctx.lineCap = 'round';
       const brow = key === 'haze' ? r * 0.05 : -r * 0.02;
@@ -521,12 +534,19 @@
       // nose
       ctx.strokeStyle = lerpHex2(skin, '#000', 0.18); ctx.lineWidth = r * 0.07;
       ctx.beginPath(); ctx.moveTo(cx, ey + r * 0.18); ctx.lineTo(cx - r * 0.08, ey + r * 0.45); ctx.stroke();
-      // mouth (expression: sad for clara/haze, neutral else)
-      ctx.strokeStyle = '#7a3a3a'; ctx.lineWidth = r * 0.1; ctx.beginPath();
+      // mouth (talking opens it; otherwise an expression line)
       const my = cy + r * 0.55;
-      if (key === 'clara' || key === 'haze') { ctx.moveTo(cx - r * 0.3, my + r * 0.08); ctx.quadraticCurveTo(cx, my - r * 0.08, cx + r * 0.3, my + r * 0.08); }
-      else { ctx.moveTo(cx - r * 0.28, my); ctx.lineTo(cx + r * 0.28, my); }
-      ctx.stroke();
+      if (anim.open > 0.18) {
+        const o = anim.open;
+        this.ellipse(cx, my + r * 0.04, r * 0.24, r * (0.05 + 0.22 * o), '#3a1c20');
+        this.ellipse(cx, my + r * 0.04 + r * 0.06 * o, r * 0.12, r * (0.02 + 0.10 * o), '#9a4a52'); // tongue
+        ctx.strokeStyle = '#7a3a3a'; ctx.lineWidth = r * 0.06; ctx.beginPath(); ctx.arc(cx, my, r * 0.26, 0.2, Math.PI - 0.2); ctx.stroke();
+      } else {
+        ctx.strokeStyle = '#7a3a3a'; ctx.lineWidth = r * 0.1; ctx.beginPath();
+        if (key === 'clara' || key === 'haze') { ctx.moveTo(cx - r * 0.3, my + r * 0.08); ctx.quadraticCurveTo(cx, my - r * 0.08, cx + r * 0.3, my + r * 0.08); }
+        else { ctx.moveTo(cx - r * 0.28, my); ctx.lineTo(cx + r * 0.28, my); }
+        ctx.stroke();
+      }
       // glasses for Samson
       if (key === 'samson') {
         ctx.strokeStyle = '#22242c'; ctx.lineWidth = r * 0.08;
@@ -564,7 +584,8 @@
       }
     },
 
-    _faceTung(cx, cy, r) {
+    _faceTung(cx, cy, r, anim) {
+      anim = anim || { open: 0, blink: false };
       const ctx = this.ctx;
       this.roundRect(cx - r * 1.0, cy - r * 1.55, r * 2.0, r * 0.7, r * 0.2, '#16162a'); // cap
       ctx.fillStyle = this.vgrad(cx - r, cy - r, r * 2, r * 2.6, '#b07f33', '#7c521f');
@@ -573,15 +594,18 @@
       for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(cx - r * 0.9, cy + i * r * 0.5); ctx.bezierCurveTo(cx, cy + i * r * 0.5 - r * 0.15, cx, cy + i * r * 0.5 + r * 0.15, cx + r * 0.9, cy + i * r * 0.5); ctx.stroke(); }
       ctx.strokeStyle = '#3a2410'; ctx.lineWidth = r * 0.16; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(cx - r * 0.7, cy - r * 0.55); ctx.lineTo(cx - r * 0.1, cy - r * 0.4); ctx.moveTo(cx + r * 0.7, cy - r * 0.55); ctx.lineTo(cx + r * 0.1, cy - r * 0.4); ctx.stroke();
-      this.ellipse(cx - r * 0.4, cy - r * 0.2, r * 0.32, r * 0.4, '#f4f0e6'); this.ellipse(cx + r * 0.4, cy - r * 0.2, r * 0.32, r * 0.4, '#f4f0e6');
-      this.circle(cx - r * 0.38, cy - r * 0.15, r * 0.16, '#9a1414'); this.circle(cx + r * 0.42, cy - r * 0.15, r * 0.16, '#9a1414');
-      // grin
-      ctx.fillStyle = '#160a04'; this._rrPath(cx - r * 0.7, cy + r * 0.35, r * 1.4, r * 0.55, r * 0.15); ctx.fill();
+      if (anim.blink) { ctx.strokeStyle = '#3a2410'; ctx.lineWidth = r * 0.12; ctx.beginPath(); ctx.moveTo(cx - r * 0.7, cy - r * 0.2); ctx.lineTo(cx - r * 0.1, cy - r * 0.2); ctx.moveTo(cx + r * 0.7, cy - r * 0.2); ctx.lineTo(cx + r * 0.1, cy - r * 0.2); ctx.stroke(); }
+      else { this.ellipse(cx - r * 0.4, cy - r * 0.2, r * 0.32, r * 0.4, '#f4f0e6'); this.ellipse(cx + r * 0.4, cy - r * 0.2, r * 0.32, r * 0.4, '#f4f0e6'); this.circle(cx - r * 0.38, cy - r * 0.15, r * 0.16, '#9a1414'); this.circle(cx + r * 0.42, cy - r * 0.15, r * 0.16, '#9a1414'); }
+      // grin / gnashing jaw (opens when talking)
+      const jaw = r * (0.55 + 0.7 * anim.open);
+      ctx.fillStyle = '#160a04'; this._rrPath(cx - r * 0.7, cy + r * 0.35, r * 1.4, jaw, r * 0.15); ctx.fill();
       ctx.fillStyle = '#f4f0e6'; ctx.fillRect(cx - r * 0.7, cy + r * 0.35, r * 1.4, r * 0.16);
+      ctx.fillRect(cx - r * 0.7, cy + r * 0.35 + jaw - r * 0.16, r * 1.4, r * 0.16); // lower teeth
       ctx.strokeStyle = '#160a04'; ctx.lineWidth = r * 0.07;
-      for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(cx + i * r * 0.28, cy + r * 0.35); ctx.lineTo(cx + i * r * 0.28, cy + r * 0.9); ctx.stroke(); }
+      for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(cx + i * r * 0.28, cy + r * 0.35); ctx.lineTo(cx + i * r * 0.28, cy + r * 0.35 + jaw); ctx.stroke(); }
     },
-    _faceTralalero(cx, cy, r) {
+    _faceTralalero(cx, cy, r, anim) {
+      anim = anim || { open: 0, blink: false };
       const ctx = this.ctx;
       ctx.fillStyle = this.vgrad(cx - r, cy - r, r * 2, r * 2, '#4a83c0', '#2f5f96');
       this.ellipse(cx + r * 0.1, cy, r * 1.05, r * 0.95, ctx.fillStyle);
@@ -590,13 +614,17 @@
       ctx.fillStyle = '#f2f5fa'; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(cx - r * 1.2 + i * r * 0.28, cy + r * 0.45); ctx.lineTo(cx - r * 1.1 + i * r * 0.28, cy + r * 0.2); ctx.lineTo(cx - r * 1.0 + i * r * 0.28, cy + r * 0.45); ctx.closePath(); ctx.fill(); }
       ctx.beginPath(); ctx.moveTo(cx, cy - r * 0.8); ctx.lineTo(cx + r * 0.3, cy - r * 1.5); ctx.lineTo(cx + r * 0.6, cy - r * 0.7); ctx.closePath(); ctx.fillStyle = '#2a5286'; ctx.fill();
       this.circle(cx + r * 0.2, cy - r * 0.3, r * 0.22, '#fff'); this.circle(cx + r * 0.22, cy - r * 0.27, r * 0.1, '#101014');
+      // gaping shark maw along the snout (opens when talking)
+      if (anim.open > 0.2) this.ellipse(cx - r * 0.55, cy + r * 0.32, r * 0.6, r * (0.06 + 0.22 * anim.open), '#13243a');
     },
-    _faceHerald(cx, cy, r) {
+    _faceHerald(cx, cy, r, anim) {
+      anim = anim || { open: 0, blink: false };
       const ctx = this.ctx;
       ctx.fillStyle = this.vgrad(cx - r * 0.9, cy - r, r * 1.8, r * 2.2, '#9a6b2f', '#6e4a1f');
       this._rrPath(cx - r * 0.85, cy - r, r * 1.7, r * 2.1, r * 0.3); ctx.fill();
       this.ellipse(cx - r * 0.35, cy - r * 0.1, r * 0.2, r * 0.3, '#120a04'); this.ellipse(cx + r * 0.35, cy - r * 0.1, r * 0.2, r * 0.3, '#120a04');
-      this.roundRect(cx - r * 0.4, cy + r * 0.5, r * 0.8, r * 0.25, r * 0.1, '#120a04');
+      const mh = r * (0.25 + 0.5 * anim.open);
+      this.roundRect(cx - r * 0.4, cy + r * 0.5, r * 0.8, mh, r * 0.1, '#120a04');
       ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = r * 0.08; ctx.beginPath(); ctx.moveTo(cx - r * 0.8, cy + r * 0.1); ctx.lineTo(cx + r * 0.8, cy + r * 0.1); ctx.stroke();
     }
   };

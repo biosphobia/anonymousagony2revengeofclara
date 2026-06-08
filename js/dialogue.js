@@ -50,7 +50,8 @@
       GFX.box(x, y, w, h);
       let tx = x + 10;
       if (this.portrait) {
-        GFX.drawPortrait(this.portrait, x + 6, y + 7, 40, 40);
+        const talking = (global.Voice && global.Voice.isSpeaking()) || (this.revealed < this.total);
+        GFX.drawPortrait(this.portrait, x + 6, y + 7, 40, 40, { talk: talking });
         tx = x + 54;
       }
       if (this.who) {

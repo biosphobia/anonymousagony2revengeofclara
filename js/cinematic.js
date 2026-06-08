@@ -140,6 +140,10 @@
 
       (BG[this.bg] || BG.black)(GFX, this.bgT, this.gT);
       if (this.effect === 'rain') drawRain(ctx, this.gT, 0.5);
+      // who is currently speaking (for the talking animation)
+      this._speakerKey = (this.caption && this.caption.kind === 'say' && this.caption.who) ? DATA.SPEAKER_PORTRAITS[this.caption.who] : null;
+      this._talking = !!(this.caption && this.caption.kind === 'say') &&
+        ((global.Voice && global.Voice.isSpeaking()) || (this.caption.shown < this.caption.full));
       // actors back-to-front
       const list = Object.keys(this.actors).map(k => this.actors[k]).sort((a, b) => a.y - b.y);
       list.forEach(a => this._drawActor(a));
@@ -173,9 +177,17 @@
       let ox = 0, oy = 0;
       if (a.anim === 'shake') ox = Math.sin(this.gT / 50) * 1.5;
       if (a.anim === 'joy') oy = -Math.abs(Math.sin(this.gT / 180)) * 3;
+      // talking head-bob for whoever is speaking this beat
+      const speaking = this._talking && a.char === this._speakerKey;
+      if (speaking) oy += -Math.abs(Math.sin(this.gT / 70)) * 2.2;
       ctx.save(); if (a.alpha < 1) ctx.globalAlpha = a.alpha;
       GFX.drawChar(px + ox, py + oy, cfg, a.dir, this.gT / 110, { scale: a.scale, walking: !!a.tween });
       ctx.restore();
+      // animated speech cue above the speaker
+      if (speaking) {
+        const dotN = (Math.floor(this.gT / 220) % 3) + 1;
+        GFX.text('.'.repeat(dotN), a.x + ox, py + oy - 8, { color: 'rgba(255,255,255,0.8)', size: 11, align: 'center', shadow: true });
+      }
       // overlay anims
       const faceCx = a.x + ox, faceCy = py + oy + 5 * a.scale;
       if (a.anim === 'cry') {
@@ -201,7 +213,11 @@
       const x = 6, w = W - 12, h = 46, y = H - h - 4;
       GFX.box(x, y, w, h);
       let tx = x + 10;
-      if (c.portrait) { GFX.drawPortrait(c.portrait, x + 5, y + 5, 36, 36); tx = x + 48; }
+      if (c.portrait) {
+        const talking = (global.Voice && global.Voice.isSpeaking()) || (c.shown < c.full);
+        GFX.drawPortrait(c.portrait, x + 5, y + 5, 36, 36, { talk: talking });
+        tx = x + 48;
+      }
       if (c.who) { const nw = GFX.textWidth(c.who, 9) + 12; GFX.box(x + 4, y - 9, nw, 14, { fill: '#241a44', r: 4 }); GFX.text(c.who, x + 10, y - 7, { color: '#f4dca0', size: 9, weight: '700' }); }
       const shown = c.text.slice(0, Math.floor(c.shown));
       const lines = GFX.wrap(shown, w - (tx - x) - 12, 9);
