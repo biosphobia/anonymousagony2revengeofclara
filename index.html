@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Anonymous Agony 2: Clara's Revenge — a retro RPG-Maker-style web RPG." />
+  <title>Anonymous Agony 2: Clara's Revenge</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="frame">
+    <canvas id="screen" width="256" height="192"></canvas>
+
+    <!-- On-screen touch controls (shown on touch devices) -->
+    <div id="touch-controls" aria-hidden="true">
+      <div id="dpad">
+        <button class="pad" data-key="ArrowUp"    aria-label="Up">▲</button>
+        <button class="pad" data-key="ArrowLeft"  aria-label="Left">◀</button>
+        <button class="pad" data-key="ArrowRight" aria-label="Right">▶</button>
+        <button class="pad" data-key="ArrowDown"  aria-label="Down">▼</button>
+      </div>
+      <div id="abuttons">
+        <button class="abtn" data-key="x" aria-label="Cancel / Menu">B</button>
+        <button class="abtn" data-key="z" aria-label="Confirm / Action">A</button>
+      </div>
+    </div>
+
+    <div id="loading">Loading…</div>
+  </div>
+
+  <p id="hint">
+    Move: Arrows / WASD &nbsp;·&nbsp; Confirm: Z / Enter &nbsp;·&nbsp; Cancel/Menu: X / Esc &nbsp;·&nbsp; Mute: M
+  </p>
+
+  <!-- Engine modules (classic scripts so the game runs from file:// or any static host) -->
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/input.js"></script>
+  <script src="js/graphics.js"></script>
+  <script src="js/dialogue.js"></script>
+  <script src="js/battle.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
