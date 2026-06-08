@@ -18,7 +18,7 @@
   const CREDITS_SONG_SRC = 'assets/down-with-the-sickness.mp3';
   // End the credits at the end of the first chorus (seconds). Tweak to match
   // your upload exactly. Falls back to a timer if the audio can't play.
-  const CREDITS_END_SEC = 112;
+  const CREDITS_END_SEC = 122;
 
   const Game = {
     mode: 'title', frame: 0, state: null,
