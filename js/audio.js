@@ -1,146 +1,68 @@
 /* ============================================================================
- * audio.js — tiny WebAudio chiptune engine (music + SFX), zero assets.
+ * audio.js — cinematic ambient soundscape (Web Audio), no external assets.
+ * Soft pads + sparse piano-ish tones through a synthesized reverb, plus SFX.
  * ==========================================================================*/
 (function (global) {
   'use strict';
 
-  // Note name -> frequency (Hz)
   const NOTE = {};
-  (function buildNotes() {
+  (function () {
     const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-    for (let oct = 1; oct <= 6; oct++) {
-      for (let i = 0; i < 12; i++) {
-        const f = 440 * Math.pow(2, (oct * 12 + i - 57) / 12);
-        NOTE[names[i] + oct] = f;
-        if (names[i].includes('#')) NOTE[names[i].replace('#', 's') + oct] = f;
-      }
+    for (let oct = 1; oct <= 6; oct++) for (let i = 0; i < 12; i++) {
+      const f = 440 * Math.pow(2, (oct * 12 + i - 57) / 12);
+      NOTE[names[i] + oct] = f; if (names[i].includes('#')) NOTE[names[i].replace('#', 's') + oct] = f;
     }
-    NOTE['-'] = 0; // rest
   })();
+  const ch = (arr) => arr.map(n => NOTE[n]);
 
-  // Songs: { bpm, loop:[ {ch:'square'|'triangle'|'saw', vol, seq:[ [note, beats], ... ] }, ... ] }
-  // Two channels: lead + bass. Beats are in quarter notes.
+  // Ambient tracks: slow chord pads + optional sparse piano lead.
+  // chordDur in seconds. lead: [{n, at(beats within bar), dur}]
   const SONGS = {
     title: {
-      bpm: 84,
-      tracks: [
-        { wave: 'triangle', vol: 0.18, seq: [
-          ['A3',2],['C4',2],['E4',2],['A4',2],['G4',2],['E4',2],['D4',4],
-          ['F3',2],['A3',2],['C4',2],['F4',2],['E4',2],['C4',2],['A3',4]
-        ]},
-        { wave: 'sine', vol: 0.16, seq: [
-          ['A2',4],['A2',4],['F2',4],['F2',4],['D2',4],['D2',4],['E2',4],['E2',4]
-        ]}
-      ]
+      chordDur: 4.5, cutoff: 1100, pad: 'sine',
+      prog: [ch(['A2', 'C3', 'E3']), ch(['F2', 'A2', 'C3']), ch(['D2', 'F2', 'A2']), ch(['E2', 'G2', 'B2'])],
+      lead: [[{ n: 'E4', at: 0.1, d: 1.2 }, { n: 'A4', at: 1.4, d: 1.4 }], [{ n: 'C4', at: 0.2, d: 1.6 }], [{ n: 'D4', at: 0.1, d: 1.2 }, { n: 'F4', at: 1.6, d: 1.4 }], [{ n: 'B3', at: 0.4, d: 2.0 }]]
     },
-    village: {
-      bpm: 92,
-      tracks: [
-        { wave: 'triangle', vol: 0.15, seq: [
-          ['E4',1],['G4',1],['A4',2],['G4',1],['E4',1],['D4',2],
-          ['C4',1],['E4',1],['G4',2],['A4',1],['G4',1],['E4',2],
-          ['E4',1],['G4',1],['A4',2],['B4',1],['A4',1],['G4',2],
-          ['A4',2],['G4',1],['E4',1],['D4',2],['C4',2]
-        ]},
-        { wave: 'sine', vol: 0.14, seq: [
-          ['A2',2],['E2',2],['A2',2],['E2',2],['F2',2],['C2',2],['G2',2],['E2',2],
-          ['A2',2],['E2',2],['A2',2],['E2',2],['D2',2],['A2',2],['C3',2],['E2',2]
-        ]}
-      ]
+    village: { // Maple Street — quiet, sad
+      chordDur: 5, cutoff: 900, pad: 'sine',
+      prog: [ch(['A2', 'C3', 'E3']), ch(['G2', 'B2', 'D3']), ch(['F2', 'A2', 'C3']), ch(['E2', 'G2', 'B2'])],
+      lead: [[{ n: 'C4', at: 0.5, d: 2.2 }], [], [{ n: 'A3', at: 0.6, d: 2.4 }], [{ n: 'E3', at: 0.8, d: 2.6 }]]
     },
-    woods: {
-      bpm: 76,
-      tracks: [
-        { wave: 'triangle', vol: 0.14, seq: [
-          ['D4',2],['F4',2],['A4',2],['G4',1],['F4',1],['E4',4],
-          ['C4',2],['E4',2],['G4',2],['F4',1],['E4',1],['D4',4],
-          ['A3',2],['D4',2],['F4',2],['A4',2],['G4',2],['F4',2],['E4',4]
-        ]},
-        { wave: 'sine', vol: 0.13, seq: [
-          ['D2',4],['A2',4],['F2',4],['C2',4],['D2',4],['A2',4],['G2',4],['A2',4]
-        ]}
-      ]
+    woods: { // night streets — tense, hollow
+      chordDur: 4, cutoff: 700, pad: 'triangle',
+      prog: [ch(['A1', 'A2', 'B2']), ch(['A1', 'A2', 'F2']), ch(['G1', 'G2', 'A2']), ch(['A1', 'A2', 'E2'])],
+      lead: [[], [{ n: 'D4', at: 1.5, d: 1.0 }], [], [{ n: 'C4', at: 1.0, d: 1.2 }]]
     },
-    town: {
-      bpm: 108,
-      tracks: [
-        { wave: 'square', vol: 0.10, seq: [
-          ['C4',1],['E4',1],['G4',1],['E4',1],['F4',1],['A4',1],['G4',2],
-          ['D4',1],['F4',1],['A4',1],['F4',1],['G4',1],['B4',1],['C5',2],
-          ['C5',1],['B4',1],['A4',1],['G4',1],['F4',1],['E4',1],['D4',2],
-          ['C4',1],['E4',1],['G4',1],['C5',1],['G4',2],['E4',2]
-        ]},
-        { wave: 'sine', vol: 0.14, seq: [
-          ['C2',2],['G2',2],['F2',2],['C2',2],['G2',2],['D2',2],['G2',2],['G2',2],
-          ['C2',2],['G2',2],['A2',2],['F2',2],['C3',2],['G2',2],['C2',4]
-        ]}
-      ]
+    town: { // Cedar Hollow / hospital — cold, clinical
+      chordDur: 4.5, cutoff: 1300, pad: 'sine',
+      prog: [ch(['C3', 'E3', 'G3']), ch(['A2', 'C3', 'E3']), ch(['D3', 'F3', 'A3']), ch(['G2', 'B2', 'D3'])],
+      lead: [[{ n: 'G4', at: 0.4, d: 1.5 }], [{ n: 'E4', at: 0.6, d: 1.6 }], [{ n: 'A4', at: 0.3, d: 1.4 }], [{ n: 'D4', at: 0.8, d: 1.8 }]]
     },
-    keep: {
-      bpm: 96,
-      tracks: [
-        { wave: 'square', vol: 0.10, seq: [
-          ['A3',2],['A3',1],['Bb3',1],['A3',2],['G3',1],['F3',1],['E3',4],
-          ['F3',2],['F3',1],['G3',1],['F3',2],['E3',1],['D3',1],['C3',4],
-          ['A3',1],['C4',1],['E4',1],['F4',1],['E4',2],['C4',2],['A3',4]
-        ]},
-        { wave: 'saw', vol: 0.10, seq: [
-          ['A1',2],['A1',2],['F1',2],['F1',2],['E1',2],['E1',2],['A1',4],
-          ['A1',2],['A1',2],['Bb1',2],['Bb1',2],['A1',4]
-        ]}
-      ]
+    keep: { // The Hour Between — dread
+      chordDur: 3.5, cutoff: 600, pad: 'sawtooth',
+      prog: [ch(['A1', 'Bb1', 'E2']), ch(['A1', 'A2', 'Eb2']), ch(['G1', 'Ab1', 'D2']), ch(['A1', 'Bb1', 'F2'])],
+      lead: [[], [{ n: 'Bb3', at: 1.0, d: 1.4 }], [], [{ n: 'A3', at: 0.5, d: 1.8 }]]
     },
-    battle: {
-      bpm: 138,
-      tracks: [
-        { wave: 'square', vol: 0.10, seq: [
-          ['E4',1],['E4',1],['E5',2],['D5',1],['C5',1],['B4',2],
-          ['A4',1],['B4',1],['C5',1],['D5',1],['E5',2],['E4',2],
-          ['F4',1],['F4',1],['F5',2],['E5',1],['D5',1],['C5',2],
-          ['B4',1],['C5',1],['D5',1],['B4',1],['A4',2],['A4',2]
-        ]},
-        { wave: 'saw', vol: 0.11, seq: [
-          ['E2',1],['E2',1],['E2',1],['E2',1],['A2',1],['A2',1],['A2',1],['A2',1],
-          ['F2',1],['F2',1],['F2',1],['F2',1],['G2',1],['G2',1],['B2',1],['B2',1]
-        ]}
-      ]
+    battle: { // tense, pulsing (not chiptune)
+      chordDur: 2.2, cutoff: 1400, pad: 'triangle',
+      prog: [ch(['E2', 'B2', 'E3']), ch(['A2', 'E3', 'A3']), ch(['F2', 'C3', 'F3']), ch(['G2', 'D3', 'G3'])],
+      lead: [[{ n: 'E4', at: 0.0, d: 0.5 }, { n: 'B4', at: 1.0, d: 0.6 }], [{ n: 'A4', at: 0.0, d: 0.5 }], [{ n: 'C5', at: 0.0, d: 0.5 }, { n: 'A4', at: 1.1, d: 0.5 }], [{ n: 'B4', at: 0.0, d: 0.7 }]]
     },
-    boss: {
-      bpm: 150,
-      tracks: [
-        { wave: 'square', vol: 0.11, seq: [
-          ['D4',1],['D4',1],['D5',1],['C5',1],['Bb4',1],['A4',1],['G4',2],
-          ['A4',1],['Bb4',1],['A4',1],['G4',1],['F4',2],['D4',2],
-          ['D4',1],['F4',1],['A4',1],['D5',1],['C5',1],['A4',1],['Bb4',2],
-          ['A4',1],['G4',1],['F4',1],['E4',1],['D4',4]
-        ]},
-        { wave: 'saw', vol: 0.12, seq: [
-          ['D2',1],['D2',1],['D2',1],['A2',1],['Bb1',1],['Bb1',1],['Bb1',1],['F2',1],
-          ['G1',1],['G1',1],['G1',1],['D2',1],['A1',1],['A1',1],['A1',1],['A1',1]
-        ]}
-      ]
+    boss: { // dissonant, heavy
+      chordDur: 2.0, cutoff: 1200, pad: 'sawtooth',
+      prog: [ch(['D2', 'A2', 'Eb3']), ch(['D2', 'Bb2', 'E3']), ch(['C2', 'G2', 'Db3']), ch(['D2', 'A2', 'F3'])],
+      lead: [[{ n: 'D4', at: 0.0, d: 0.5 }, { n: 'Eb4', at: 1.0, d: 0.5 }], [{ n: 'Bb3', at: 0.0, d: 0.6 }], [{ n: 'Db4', at: 0.0, d: 0.5 }], [{ n: 'A3', at: 0.0, d: 0.8 }]]
     },
     victory: {
-      bpm: 132, once: true,
-      tracks: [
-        { wave: 'square', vol: 0.13, seq: [
-          ['C5',1],['C5',1],['C5',1],['C5',2],['G4',2],['A4',1],['C5',1],['G4',2],['C5',4]
-        ]},
-        { wave: 'sine', vol: 0.13, seq: [
-          ['C3',1],['C3',1],['C3',1],['C3',2],['E2',2],['F2',1],['A2',1],['G2',2],['C3',4]
-        ]}
-      ]
+      chordDur: 3.5, cutoff: 1600, pad: 'sine', once: true,
+      prog: [ch(['C3', 'E3', 'G3']), ch(['G2', 'C3', 'E3'])],
+      lead: [[{ n: 'C5', at: 0.0, d: 0.4 }, { n: 'E5', at: 0.5, d: 0.4 }, { n: 'G5', at: 1.0, d: 1.2 }], [{ n: 'C5', at: 0.0, d: 2.0 }]]
     }
   };
 
   const Sound = {
-    ctx: null,
-    master: null,
-    musicGain: null,
-    muted: false,
-    started: false,
-    current: null,
-    _timer: null,
+    ctx: null, master: null, musicBus: null, reverb: null, muted: false, started: false,
+    current: null, _timer: null, _idx: 0,
 
     init() {
       if (this.ctx) return;
@@ -148,125 +70,132 @@
       if (!AC) return;
       this.ctx = new AC();
       this.master = this.ctx.createGain();
-      this.master.gain.value = this.muted ? 0 : 0.9;
+      this.master.gain.value = this.muted ? 0 : 0.85;
       this.master.connect(this.ctx.destination);
-      this.musicGain = this.ctx.createGain();
-      this.musicGain.gain.value = 1;
-      this.musicGain.connect(this.master);
+      // reverb
+      this.reverb = this.ctx.createConvolver();
+      this.reverb.buffer = this._impulse(2.2, 2.4);
+      const revGain = this.ctx.createGain(); revGain.gain.value = 0.55;
+      this.reverb.connect(revGain); revGain.connect(this.master);
+      this._revIn = this.reverb;
+      // music bus
+      this.musicBus = this.ctx.createGain(); this.musicBus.gain.value = 0.9;
+      this.musicBus.connect(this.master); this.musicBus.connect(this.reverb);
     },
 
-    // Must be called after a user gesture.
-    resume() {
-      this.init();
-      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
-      this.started = true;
+    _impulse(dur, decay) {
+      const rate = this.ctx.sampleRate, len = rate * dur;
+      const buf = this.ctx.createBuffer(2, len, rate);
+      for (let c = 0; c < 2; c++) {
+        const d = buf.getChannelData(c);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay);
+      }
+      return buf;
     },
 
-    toggleMute() {
-      this.muted = !this.muted;
-      if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.9, this.ctx.currentTime, 0.02);
-      return this.muted;
-    },
+    resume() { this.init(); if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume(); this.started = true; },
+    toggleMute() { this.muted = !this.muted; if (this.master) this.master.gain.setTargetAtTime(this.muted ? 0 : 0.85, this.ctx.currentTime, 0.03); return this.muted; },
 
-    // ---- Music ----
     playMusic(name) {
       if (!this.ctx) { this.current = name; return; }
       if (this.current === name && this._timer) return;
       this.stopMusic();
-      const song = SONGS[name];
-      if (!song) return;
-      this.current = name;
-      this._scheduleSong(song);
+      if (!SONGS[name]) return;
+      this.current = name; this._idx = 0;
+      this._loop();
+    },
+    stopMusic() { this.current = null; if (this._timer) { clearTimeout(this._timer); this._timer = null; } },
+
+    _loop() {
+      const song = SONGS[this.current]; if (!song) return;
+      const name = this.current;
+      const t = this.ctx.currentTime + 0.06;
+      const i = this._idx % song.prog.length;
+      this._pad(song.prog[i], t, song.chordDur, song.pad, song.cutoff);
+      const lead = (song.lead && song.lead[i]) || [];
+      lead.forEach(ev => this._piano(NOTE[ev.n], t + ev.at, ev.d));
+      this._idx++;
+      if (song.once && this._idx >= song.prog.length) { this._timer = null; return; }
+      this._timer = setTimeout(() => { if (this.current === name) this._loop(); }, song.chordDur * 1000);
     },
 
-    stopMusic() {
-      this.current = null;
-      if (this._timer) { clearTimeout(this._timer); this._timer = null; }
-      if (this._voices) { this._voices.forEach(v => { try { v.stop(); } catch (e) {} }); this._voices = []; }
-    },
-
-    _scheduleSong(song) {
+    // soft evolving pad (chord)
+    _pad(freqs, start, dur, wave, cutoff) {
       const ctx = this.ctx;
-      const beat = 60 / song.bpm;
-      const songName = this.current;
-      const playOnce = (startTime) => {
-        let maxEnd = 0;
-        this._voices = this._voices || [];
-        song.tracks.forEach(tr => {
-          let t = startTime;
-          tr.seq.forEach(([n, beats]) => {
-            const dur = beats * beat;
-            const freq = NOTE[n] || 0;
-            if (freq > 0) this._note(tr.wave, freq, t, dur * 0.92, tr.vol);
-            t += dur;
-          });
-          maxEnd = Math.max(maxEnd, t - startTime);
-        });
-        return maxEnd;
-      };
-      const loopFn = () => {
-        if (this.current !== songName) return;
-        const len = playOnce(ctx.currentTime + 0.05);
-        if (song.once) { this._timer = null; return; }
-        this._timer = setTimeout(loopFn, len * 1000);
-      };
-      loopFn();
-    },
-
-    _note(wave, freq, start, dur, vol) {
-      const ctx = this.ctx;
-      const osc = ctx.createOscillator();
+      const filt = ctx.createBiquadFilter(); filt.type = 'lowpass';
+      filt.frequency.setValueAtTime((cutoff || 900) * 0.6, start);
+      filt.frequency.linearRampToValueAtTime(cutoff || 900, start + dur * 0.4);
+      filt.frequency.linearRampToValueAtTime((cutoff || 900) * 0.7, start + dur);
       const g = ctx.createGain();
-      osc.type = wave === 'saw' ? 'sawtooth' : wave;
-      osc.frequency.value = freq;
-      const v = (vol || 0.1);
       g.gain.setValueAtTime(0.0001, start);
-      g.gain.exponentialRampToValueAtTime(v, start + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.16, start + dur * 0.35);
       g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-      osc.connect(g); g.connect(this.musicGain);
-      osc.start(start); osc.stop(start + dur + 0.02);
+      filt.connect(g); g.connect(this.musicBus);
+      freqs.forEach(f => {
+        if (!f) return;
+        [0, 1].forEach(k => {
+          const o = ctx.createOscillator();
+          o.type = wave || 'sine';
+          o.frequency.value = f * (k ? 1.005 : 0.997);
+          o.connect(filt); o.start(start); o.stop(start + dur + 0.1);
+        });
+      });
     },
 
-    // ---- SFX ----
+    // sparse piano-ish tone (fast attack, medium decay)
+    _piano(freq, start, dur) {
+      if (!freq) return;
+      const ctx = this.ctx;
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'triangle'; o2.type = 'sine';
+      o.frequency.value = freq; o2.frequency.value = freq * 2;
+      const g2 = ctx.createGain(); g2.gain.value = 0.25; o2.connect(g2); g2.connect(g);
+      g.gain.setValueAtTime(0.0001, start);
+      g.gain.exponentialRampToValueAtTime(0.2, start + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+      o.connect(g); g.connect(this.musicBus); g.connect(this.reverb);
+      o.start(start); o.stop(start + dur + 0.1); o2.start(start); o2.stop(start + dur + 0.1);
+    },
+
+    // ---- SFX (soft, non-chiptune) ----
     sfx(type) {
       if (!this.ctx) return;
       const ctx = this.ctx, now = ctx.currentTime;
-      const beep = (freq, dur, wave, vol, slideTo) => {
-        const osc = ctx.createOscillator(), g = ctx.createGain();
-        osc.type = wave || 'square';
-        osc.frequency.setValueAtTime(freq, now);
-        if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
-        g.gain.setValueAtTime(vol || 0.18, now);
+      const tone = (freq, dur, wave, vol, slideTo, rev) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = wave || 'sine'; o.frequency.setValueAtTime(freq, now);
+        if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+        g.gain.setValueAtTime(0.0001, now); g.gain.exponentialRampToValueAtTime(vol || 0.16, now + 0.01);
         g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
-        osc.connect(g); g.connect(this.master);
-        osc.start(now); osc.stop(now + dur + 0.02);
+        o.connect(g); g.connect(this.master); if (rev) g.connect(this.reverb);
+        o.start(now); o.stop(now + dur + 0.02);
       };
-      const noise = (dur, vol) => {
-        const n = Math.floor(ctx.sampleRate * dur);
-        const buf = ctx.createBuffer(1, n, ctx.sampleRate);
-        const d = buf.getChannelData(0);
+      const noise = (dur, vol, cutoff) => {
+        const n = Math.floor(ctx.sampleRate * dur), buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
         for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2);
         const src = ctx.createBufferSource(); src.buffer = buf;
-        const g = ctx.createGain(); g.gain.value = vol || 0.2;
-        src.connect(g); g.connect(this.master); src.start(now);
+        const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = cutoff || 1800;
+        const g = ctx.createGain(); g.gain.value = vol || 0.18;
+        src.connect(f); f.connect(g); g.connect(this.master); src.start(now);
       };
       switch (type) {
-        case 'cursor':  beep(520, 0.05, 'square', 0.12); break;
-        case 'confirm': beep(440, 0.06, 'square', 0.14); beep(660, 0.08, 'square', 0.12); break;
-        case 'cancel':  beep(330, 0.08, 'square', 0.12, 180); break;
-        case 'select':  beep(700, 0.05, 'square', 0.12); break;
-        case 'hit':     noise(0.12, 0.22); beep(180, 0.1, 'square', 0.12, 80); break;
-        case 'crit':    noise(0.18, 0.28); beep(140, 0.16, 'sawtooth', 0.16, 60); break;
-        case 'enemyhit':beep(260, 0.08, 'square', 0.12, 120); noise(0.08, 0.14); break;
-        case 'heal':    beep(523, 0.09, 'sine', 0.14); beep(784, 0.12, 'sine', 0.12); break;
-        case 'magic':   beep(880, 0.06, 'sine', 0.12, 1320); beep(660, 0.1, 'triangle', 0.1); break;
-        case 'item':    beep(660, 0.06, 'triangle', 0.12); beep(880, 0.08, 'triangle', 0.1); break;
-        case 'levelup': beep(523,0.1,'square',0.14);beep(659,0.1,'square',0.14);beep(784,0.1,'square',0.14);beep(1046,0.2,'square',0.14); break;
-        case 'flee':    beep(400,0.06,'square',0.1,800); beep(500,0.06,'square',0.1,900); break;
-        case 'door':    beep(200,0.12,'sine',0.12,140); break;
-        case 'defeat':  beep(330,0.2,'sawtooth',0.14,110); beep(220,0.4,'sawtooth',0.12,80); break;
-        case 'encounter': beep(880,0.05,'square',0.14); beep(660,0.05,'square',0.14); beep(440,0.12,'square',0.14); break;
-        case 'gold':    beep(988,0.05,'square',0.1); beep(1318,0.07,'square',0.1); break;
+        case 'cursor': tone(620, 0.06, 'sine', 0.10); break;
+        case 'confirm': tone(540, 0.08, 'sine', 0.12); tone(760, 0.1, 'sine', 0.09, null, true); break;
+        case 'cancel': tone(300, 0.1, 'sine', 0.10, 200); break;
+        case 'select': tone(700, 0.06, 'sine', 0.1); break;
+        case 'hit': noise(0.16, 0.22, 1400); tone(150, 0.12, 'sine', 0.14, 70); break;
+        case 'crit': noise(0.22, 0.28, 2200); tone(110, 0.2, 'triangle', 0.16, 55, true); break;
+        case 'enemyhit': tone(240, 0.1, 'sine', 0.12, 120); noise(0.1, 0.12, 1200); break;
+        case 'heal': tone(523, 0.12, 'sine', 0.13, null, true); tone(784, 0.16, 'sine', 0.1, null, true); break;
+        case 'magic': tone(880, 0.1, 'sine', 0.1, 1400, true); tone(660, 0.14, 'triangle', 0.09, null, true); break;
+        case 'item': tone(660, 0.08, 'triangle', 0.11); tone(880, 0.1, 'triangle', 0.09, null, true); break;
+        case 'levelup': [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.18, 'sine', 0.13, null, true), i * 90)); break;
+        case 'flee': tone(420, 0.08, 'sine', 0.1, 820); tone(520, 0.08, 'sine', 0.1, 920); break;
+        case 'door': tone(180, 0.18, 'sine', 0.12, 120, true); break;
+        case 'defeat': tone(300, 0.3, 'triangle', 0.14, 90, true); tone(200, 0.5, 'sine', 0.12, 70, true); break;
+        case 'encounter': tone(740, 0.08, 'sine', 0.12); tone(520, 0.1, 'sine', 0.12); tone(330, 0.18, 'triangle', 0.12, null, true); break;
+        case 'gold': tone(940, 0.06, 'sine', 0.1); tone(1280, 0.09, 'sine', 0.08, null, true); break;
+        case 'knock': tone(150, 0.16, 'sine', 0.2, 90, true); noise(0.06, 0.1, 600); break; // the sahur drum
         default: break;
       }
     }

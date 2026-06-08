@@ -208,7 +208,7 @@
       if (ev.idx >= ev.list.length) { this._endCutscene(); return; }
       const e = ev.list[ev.idx++];
 
-      if ('say' in e) { Dialogue.start(e.text, e.say); ev.waiting = 'dialogue'; return; }
+      if ('say' in e) { Dialogue.start(e.text, e.say, e.say ? (DATA.SPEAKER_PORTRAITS[e.say] || null) : null); ev.waiting = 'dialogue'; return; }
       if (e.narrate) { this.narration = { lines: e.narrate, t: 0 }; ev.waiting = 'narrate'; return; }
       if (e.setFlag) { this.state.flags[e.setFlag] = e.value; World.refreshEntities(); return this._step(); }
       if ('gold' in e) { this.addGold(e.gold); Sound.sfx('gold'); return this._step(); }
@@ -217,7 +217,7 @@
       if (e.heal) { this.healParty(); Sound.sfx('heal'); return this._step(); }
       if (e.rest) {
         this.healParty(); Sound.sfx('heal');
-        Dialogue.start('You rest through the night. HP and MP fully restored.', 'Innkeeper');
+        Dialogue.start('Rest a while. HP and MP fully restored.', 'Night Nurse', 'innkeep');
         ev.waiting = 'dialogue'; return;
       }
       if (e.shop) { this.openShop(e.shop, () => { this.mode = 'cutscene'; this._step(); }); return; }
@@ -524,6 +524,7 @@
     // Render
     // -----------------------------------------------------------------
     render() {
+      GFX.beginFrame();
       switch (this.mode) {
         case 'title': this._renderTitle(); break;
         case 'battle': Battle.render(); break;
@@ -580,19 +581,26 @@
     },
 
     _renderNarration() {
-      GFX.rect(0, 0, GFX.W, GFX.H, '#000');
+      const ctx = GFX.ctx;
+      // deep, slightly warm black with a soft vignette
+      ctx.fillStyle = '#05050a'; ctx.fillRect(0, 0, GFX.W, GFX.H);
+      const vg = ctx.createRadialGradient(GFX.W / 2, GFX.H / 2, 20, GFX.W / 2, GFX.H / 2, GFX.W * 0.7);
+      vg.addColorStop(0, 'rgba(30,22,30,0.5)'); vg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, GFX.W, GFX.H);
       const lines = this.narration.lines;
-      const a = Math.min(1, this.narration.t / 24);
-      GFX.ctx.globalAlpha = a;
-      const totalH = lines.length * 14;
-      let y = (GFX.H - totalH) >> 1;
+      const a = Math.min(1, this.narration.t / 26);
+      ctx.globalAlpha = a;
+      const lh = 15;
+      const totalH = lines.length * lh;
+      let y = (GFX.H - totalH) / 2;
       lines.forEach(l => {
-        GFX.text(l, GFX.W >> 1, y, { color: '#e6e2d8', size: l.startsWith('—') || l.startsWith('ANON') ? 10 : 8, align: 'center', shadow: false });
-        y += 14;
+        const big = l.startsWith('—') || l.startsWith('ANON') || l.startsWith("Clara");
+        GFX.text(l, GFX.W / 2, y, { color: big ? '#e8d8c0' : '#cfcbc2', size: big ? 12 : 9, weight: big ? '700' : '500', align: 'center', shadowColor: 'rgba(0,0,0,0.9)' });
+        y += lh;
       });
-      GFX.ctx.globalAlpha = 1;
-      if (this.narration.t > 24 && this.frame % 50 < 25)
-        GFX.text('▼', GFX.W >> 1, GFX.H - 16, { color: '#aaa', size: 8, align: 'center' });
+      ctx.globalAlpha = 1;
+      if (this.narration.t > 26 && this.frame % 60 < 30)
+        GFX.text('▼  (Z)', GFX.W / 2, GFX.H - 16, { color: 'rgba(180,180,190,0.7)', size: 8, align: 'center' });
     },
 
     _renderPause() {

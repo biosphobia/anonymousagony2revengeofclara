@@ -62,15 +62,15 @@ sandbox.localStorage = {
 };
 sandbox.addEventListener = (t, fn) => { (listeners[t] = listeners[t] || []).push(fn); };
 sandbox.AudioContext = function () {
+  const param = (v) => ({ value: v, setValueAtTime: () => {}, setTargetAtTime: () => {}, exponentialRampToValueAtTime: () => {}, linearRampToValueAtTime: () => {} });
   const node = () => ({
     connect: () => {}, start: () => {}, stop: () => {}, disconnect: () => {},
-    gain: { value: 1, setValueAtTime: () => {}, setTargetAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
-    frequency: { value: 440, setValueAtTime: () => {}, exponentialRampToValueAtTime: () => {} },
-    type: 'square'
+    gain: param(1), frequency: param(440), Q: param(1), type: 'square'
   });
   return {
     state: 'running', currentTime: 0, sampleRate: 44100, destination: {},
-    resume: () => {}, createGain: node, createOscillator: node,
+    resume: () => {}, createGain: node, createOscillator: node, createBiquadFilter: node,
+    createConvolver: () => ({ connect: () => {}, buffer: null }),
     createBuffer: (c, n) => ({ getChannelData: () => new Float32Array(n) }),
     createBufferSource: () => ({ connect: () => {}, start: () => {}, buffer: null })
   };

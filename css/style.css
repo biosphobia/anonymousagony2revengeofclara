@@ -41,8 +41,7 @@ body {
 }
 
 canvas#screen {
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  image-rendering: auto;
   background: #000;
   /* JS sets exact size; this keeps aspect when JS hasn't run yet */
   width: auto;

@@ -147,9 +147,9 @@
     building(g, 19, 3, 5, 4);
     building(g, 3, 13, 5, 4);
     building(g, 20, 13, 5, 4);
-    // graveyard (right of ruins)
-    set(g, 4, 9, '+'); set(g, 6, 9, '+'); set(g, 5, 10, '+');
-    set(g, 4, 11, '+'); set(g, 6, 11, '+');
+    // garden hedge cluster beside the boarded-up house
+    set(g, 4, 9, 'b'); set(g, 6, 9, 'b'); set(g, 5, 10, 'b');
+    set(g, 4, 11, 'b'); set(g, 6, 11, '%');
     // a few flowers / bushes
     set(g, 9, 5, '%'); set(g, 22, 9, '%'); set(g, 10, 16, 'b'); set(g, 18, 7, 'b');
     // south exit to woods
@@ -180,14 +180,14 @@
   }
 
   // ---------------------------------------------------------------------------
-  // MAP 2 — Whispering Woods
+  // MAP 2 — Night Streets (urban; no forest)
   // ---------------------------------------------------------------------------
   function buildWoods() {
     const W = 30, H = 24;
-    const g = grid(W, H, '.');
-    rectBorder(g, 0, 0, W, H, '^');
-    // scatter trees to form a winding path
-    const trees = [
+    const g = grid(W, H, 'a'); // asphalt
+    rectBorder(g, 0, 0, W, H, 'W');
+    // blocks of buildings forming a winding route through the streets
+    const blocks = [
       [3,3],[4,3],[5,3],[6,3],[8,4],[9,4],[2,6],[3,6],[6,7],[7,7],[8,7],
       [11,5],[12,5],[13,5],[14,6],[20,3],[21,3],[22,4],[25,5],[26,5],
       [4,10],[5,10],[6,11],[10,9],[11,9],[12,10],[16,8],[17,8],[18,9],
@@ -196,7 +196,7 @@
       [11,19],[12,19],[16,19],[17,19],[20,19],[21,19],[25,18],[26,18],
       [9,21],[10,21],[19,21],[20,21]
     ];
-    trees.forEach(([x, y]) => set(g, x, y, Math.random() < 0.5 ? '#' : '^'));
+    blocks.forEach(([x, y]) => set(g, x, y, Math.random() < 0.5 ? 'W' : 'B'));
     // path from top (village) down to bottom-right (town)
     vLine(g, 13, 1, 6, ':'); vLine(g, 14, 1, 6, ':');
     hLine(g, 13, 6, 4, ':');
@@ -221,7 +221,7 @@
     // treasure chest (object)
     // houndmaster blocks the path south (NPC on the road)
     return {
-      id: 'woods', name: 'The Backwoods', music: 'woods', indoor: false,
+      id: 'woods', name: 'Night Streets', music: 'woods', indoor: false,
       w: W, h: H, tiles: rows(g),
       start: { x: 13, y: 2, dir: 'down' },
       exits: [
@@ -349,9 +349,9 @@
   const ITEMS = {
     potion:  { name: 'Painkillers',  kind: 'heal', amount: 35, price: 18, desc: 'Dulls the pain. Restores 35 HP.' },
     hipotion:{ name: 'First-Aid Kit',kind: 'heal', amount: 80, price: 55, desc: 'Restores 80 HP.' },
-    tonic:   { name: 'Energy Drink', kind: 'mp',   amount: 18, price: 22, desc: 'Restores 18 WP (willpower).' },
+    tonic:   { name: 'Energy Drink', kind: 'mp',   amount: 18, price: 22, desc: 'Restores 18 MP.' },
     bandage: { name: 'Bandage',      kind: 'cure', amount: 18, price: 12, desc: 'Heals 18 HP and stops bleeding.' },
-    elixir:  { name: 'Strong Coffee',kind: 'full', amount: 0,  price: 200,desc: 'Fully restores HP and WP.' },
+    elixir:  { name: 'Strong Coffee',kind: 'full', amount: 0,  price: 200,desc: 'Fully restores HP and MP.' },
     iron_key:{ name: 'Kentungan Mallet', kind: 'key', amount: 0, price: 0, desc: 'A wooden drum-beater. Sound it to open the way between the hours.' }
   };
 
@@ -423,60 +423,102 @@
       { fade: 'out', dur: 0 },
       { narrate: [
         "ANONYMOUS AGONY II",
-        "— Clara's Revenge —"
+        "Clara's Revenge"
       ] },
       { narrate: [
-        "Years ago, in the house on Maple Street,",
-        "something happened to a ten-year-old girl",
-        "that no child should ever survive."
+        "A house on Maple Street. A few years ago.",
+        "Back when the lights were always on,",
+        "and the loudest thing in it was a little girl."
       ] },
+      { say: 'Clara', text: "HAAAZE. You PROMISED you'd play the dumb co-op level with me. Oh my god. You are SUCH an Ass." },
+      { say: 'Haze', text: "Language, twerp. ...After dinner. And quit grinning at me like that, it's creepy." },
+      { say: 'Clara', text: "Can't help it! My face just does this when I win. Which is always. Get used to it, loser." },
       { narrate: [
-        "Her brother Haze — the one the news called",
-        "'the Anonymous' — made the men responsible",
-        "disappear. Then the courts made him disappear too.",
+        "Clara. Ten years old. Scary-smart. Sunny.",
+        "Half her life lived online — friends, games,",
+        "a hundred little chats glowing past her bedtime.",
         "",
-        "Clara grew up alone, with the quiet. And the guilt."
+        "She was the heart of a very quiet house."
       ] },
       { narrate: [
-        "Lately, in the dead hour before dawn,",
-        "Maple Street hears it.  Tung.  Tung.  Tung.",
+        "Then, one ordinary afternoon,",
+        "the bad thing happened.",
         "",
-        "Old folk say: when the sahur drum calls, you answer.",
-        "Ignore it three times, and IT comes to your door —",
-        "and takes you into the hour that has no name."
+        "The kind that doesn't leave bruises you can see.",
+        "The house never sounded the same again."
       ] },
       { narrate: [
-        "Three neighbors are already gone.",
+        "There was a hospital after that. White rooms.",
+        "A kind, tired man named Dr. Samson.",
         "",
-        "Tonight Clara woke at 3:00 AM to knocking.",
-        "She did not answer. Not once. Not twice.",
-        "The third knock has already come."
+        "Clara stopped grinning."
       ] },
-      { fade: 'in', dur: 40 },
-      { say: "Clara", text: "Tung Tung Tung Sahur. I heard you the first time." },
-      { say: "Clara", text: "I've spent my whole life being taken from. Not tonight. Tonight I take it back." },
-      { say: null, text: "(Dr. Samson is waiting out by the porch light. Talk to him.)" }
+      { say: 'Clara', text: "...Dr. Samson says if I say it out loud, it gets smaller. ...He's wrong. It just learns my voice." },
+      { narrate: [
+        "Haze didn't go to therapy.",
+        "Haze went hunting. The news gave him a name —",
+        "'the Anonymous.' Then the courts gave him another.",
+        "",
+        "'Guilty.' And took him away too."
+      ] },
+      { narrate: [
+        "So Clara stayed. Alone in the house on Maple Street.",
+        "Alone with the quiet, and the dark, and a guilt",
+        "that was never hers to carry —",
+        "but moved in anyway, and never paid rent."
+      ] },
+      { narrate: [
+        "The grandmothers have a saying.",
+        "Before dawn, the drum calls you to rise. To sahur.",
+        "You answer. You always answer.",
+        "",
+        "Ignore the call three times... and something answers FOR you.",
+        "It walks in from the hour that has no name. It carries a bat."
+      ] },
+      { say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... sahur~ tralalero tralala, bambina Claraaa..." },
+      { say: 'Tung Tung Tung Sahur', text: "you no answer? uno... due... TRE knock-knock! bombardiro crocodilo! e poi... I come with the stick. tung tung tung!" },
+      { narrate: [
+        "It feeds on the sleepless and the guilt-ridden.",
+        "Clara was a feast.",
+        "",
+        "For weeks it knocked, and weeping, she answered every time.",
+        "Until tonight."
+      ] },
+      { narrate: [
+        "3:00 AM. The porch boards creak.",
+        "Knock one. She freezes. Knock two. She does not move.",
+        "",
+        "Knock three.",
+        "",
+        "Then the lock goes quiet — and the air goes wrong.",
+        "The hour without a name is bleeding into the house."
+      ] },
+      { fade: 'in', dur: 50 },
+      { say: 'Clara', text: "Okay. Okay okayokayokay. Breathe. ...God, Haze would call me such an idiot for this." },
+      { say: 'Clara', text: "He'd ALSO say don't you DARE let it win. So. ...Fine. I'm up. I'm answering." },
+      { say: 'Clara', text: "Tung Tung Tung Sahur. You wanted me awake? I'm awake. Come knock ONE more time." },
+      { say: null, text: "(Dr. Samson is waiting under the porch light. Talk to him.)" }
     ]),
 
     samson: (ctx) => {
       if (ctx.flags.tung_dead) return [
-        { say: 'Dr. Samson', text: "Dawn came. After all these years, you finally let it. Rest now, Clara." }
+        { say: 'Dr. Samson', text: "It's quiet. Really quiet. You did it, Clara. ...Get some sleep. Doctor's orders." }
       ];
       if (ctx.flags.samson_told) return [
-        { say: 'Dr. Samson', text: "Through the backwoods to Cedar Hollow. Sound the drum, and the way between the hours will open." },
-        { say: 'Dr. Samson', text: "It feeds on the sleepless and the guilty, Clara. Don't give it your guilt. Give it nothing." }
+        { say: 'Dr. Samson', text: "Through the streets to Cedar Hollow, then sound the drum. The way between the hours will open." },
+        { say: 'Dr. Samson', text: "It eats guilt, Clara. So don't hand it yours. What happened was never your fault. Say it walking." }
       ];
       return [
-        { say: 'Dr. Samson', text: "Clara. You called at three in the morning and I came. Old habits — you were my patient a long time." },
-        { say: 'Clara', text: "It's real, isn't it. The thing the grandmothers warned about. It took the Hendersons. The boy two doors down." },
-        { say: 'Dr. Samson', text: "Tung Tung Tung Sahur. It comes for those who won't answer the call — the sleepless, the guilt-ridden." },
-        { say: 'Dr. Samson', text: "It has been circling you for years, Clara. You are exactly the meal it likes." },
-        { say: 'Clara', text: "Then I'll stop running from it. Where do I find it?" },
-        { say: 'Dr. Samson', text: "South, through the backwoods, to Cedar Hollow. Take Haze's old bat. And take these — you'll need them." },
+        { say: 'Dr. Samson', text: "Clara. You called me at three in the morning, so here I am. Old habits — you were my patient a long time." },
+        { say: 'Clara', text: "It's real, right? The drum thing the old folks warn about. It already took the Hendersons. And the kid two doors down." },
+        { say: 'Dr. Samson', text: "Tung Tung Tung Sahur. It comes for the ones who can't answer the call — the sleepless. The guilt-ridden." },
+        { say: 'Dr. Samson', text: "Clara... it has circled you for years. To a thing like that, you smell like a home-cooked meal." },
+        { say: 'Clara', text: "Cool. Super reassuring, doc. A+. ...So how do I make it stop?" },
+        { say: 'Dr. Samson', text: "Find where the hours meet, beyond Cedar Hollow. Take Haze's old bat. And take these — please." },
         { give: 'potion', n: 3 },
         { gold: 30 },
         { setFlag: 'samson_told', value: true },
-        { say: null, text: "(Received 3x Painkillers and 30 gold. Head south into the backwoods.)" }
+        { say: null, text: "(Received 3x Painkillers and 30 gold. Head down Maple Street into the night.)" }
       ];
     },
 
@@ -492,8 +534,8 @@
     ],
 
     memory: () => ([
-      { say: null, text: "Haze's old room. His jacket still hangs on the door. A photo of two kids who didn't know yet." },
-      { say: 'Clara', text: "...You hunted monsters for me, big brother. My turn." }
+      { say: null, text: "Haze's old room. His jacket still hangs on the door. A photo of two grinning kids who didn't know yet." },
+      { say: 'Clara', text: "Your dumb jacket still smells like you, Ass. ...You hunted the monsters so I didn't have to. Okay. My turn now." }
     ]),
 
     door_knock: () => ([
@@ -512,13 +554,13 @@
 
     tralalero: (ctx) => {
       if (ctx.flags.tralalero_dead) return [
-        { say: null, text: "The shark-thing is gone. Its mallet lies in the leaves. The drum can be sounded now." }
+        { say: null, text: "The shark-thing is gone. Its mallet sits in a puddle under the streetlight. The drum can be sounded now." }
       ];
       return [
-        { say: '???', text: "Tralalero tralala! Porco shark on the path, porco SHARK!" },
-        { say: 'Clara', text: "...A shark. In sneakers. In the woods. Of course." },
-        { say: 'Tralalero Tralala', text: "Sahur sent me, bambina! No one reaches the drum tower! Tralalala!" },
-        { say: 'Clara', text: "Move, or be moved." },
+        { say: '???', text: "Tralalero tralala! porco shark in the parking lot, porco SHAAARK!" },
+        { say: 'Clara', text: "...A shark. Wearing sneakers. In the middle of the street. Yeah. Sure. Why not. Tonight's already insane." },
+        { say: 'Tralalero Tralala', text: "Sahur send me, bambina Clara! tralalala, no one reach the drum, no one no one NO ONE!" },
+        { say: 'Clara', text: "Move, fish-stick. I'm having a really bad night and you are NOT helping." },
         { battle: 'tralalero', boss: true },
         { setFlag: 'tralalero_dead', value: true },
         { setFlag: 'woods_clear', value: true },
@@ -532,11 +574,12 @@
         { say: 'Haze', text: "Lead on, sis. The Herald and the big one are waiting. Let's finish it." }
       ];
       return [
-        { say: '???', text: "Still picking fights with monsters, huh. You get that from me." },
-        { say: 'Clara', text: "...Haze? No. You're — the courts took you. You're not—" },
-        { say: 'Haze', text: "Real? Out here, in the hour between, 'real' gets pretty thin. The thing took me before it took the neighbors." },
-        { say: 'Haze', text: "I couldn't protect you back then, not really. Let me stand with you for this one. One last time." },
-        { say: 'Clara', text: "...Okay. Okay. Keep up, big brother." },
+        { say: '???', text: "Still picking fights way out of your weight class, twerp. ...You get that from me." },
+        { say: 'Clara', text: "...Haze? No. No no no. They TOOK you. I waved at a bus with bars on the windows. You're not—" },
+        { say: 'Haze', text: "Real? Out here, where the hours meet, 'real' gets pretty thin, kiddo. The thing got me before it got the neighbors." },
+        { say: 'Haze', text: "I couldn't protect you when it counted. Not really. So let me cover you for this one. One last time." },
+        { say: 'Clara', text: "...You absolute Ass. You don't get to show up and make me cry in a haunted parking lot." },
+        { say: 'Clara', text: "...Keep up, okay? I missed you so much it's stupid." },
         { join: 'haze' },
         { setFlag: 'haze_joined', value: true },
         { say: null, text: "(Haze — the Anonymous — joined your party!)" }
@@ -552,10 +595,10 @@
     ]),
 
     gossip: (ctx) => ctx.flags.gate_open ? [
-      { say: 'Townsfolk', text: "You sounded the drum? You opened the WAY? Nobody comes back from the hour between..." }
+      { say: 'Townsfolk', text: "You sounded the drum? You opened the WAY? Kid... nobody comes back out of the hour between." }
     ] : [
-      { say: 'Townsfolk', text: "The way to the tower only opens to the kentungan mallet — the drum-beater itself." },
-      { say: 'Townsfolk', text: "They say the shark-thing in the woods carried it. If you've got it... Cedar Hollow will pray for you." }
+      { say: 'Townsfolk', text: "The way only opens to the kentungan mallet — the drum-beater itself. Sound it, and the hours split open." },
+      { say: 'Townsfolk', text: "That shark-thing prowling the back streets had it last. If you can take it... Cedar Hollow will pray for you." }
     ],
 
     wayguard: (ctx) => {
@@ -598,11 +641,12 @@
         { say: null, text: "Where the creature stood, only a plain wooden drum-beater remains. The hour is over." }
       ];
       return [
-        { say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... little Clara. you never answered me. so i kept... knocking." },
-        { say: 'Clara', text: "You've been the sound under everything. Every sleepless night since I was ten." },
-        { say: 'Tung Tung Tung Sahur', text: "i am your guilt with a face and a bat. you cannot kill your own guilt, bambina." },
-        { say: 'Haze', text: "She's not alone with it anymore. Tell him, sis." },
-        { say: 'Clara', text: "It was never my fault. It was never my guilt to carry. ...And I am done feeding you." },
+        { say: 'Tung Tung Tung Sahur', text: "tung tung tung sahuuur~ little Clara! tralalero tralala, you no answer, so I knock and knock and KNOCK, tung tung tung!" },
+        { say: 'Clara', text: "You've been the sound under everything. Every sleepless night since I was ten. The thing in the walls. ...You're real ugly in person, by the way." },
+        { say: 'Tung Tung Tung Sahur', text: "bombardiro crocodilo! I am you GUILT, bambina, con la faccia e il bat! lirili larila~ you no can kill your own guilt, no no no, tralalala!" },
+        { say: 'Haze', text: "She's not alone in the dark anymore. Go on, sis. Say it." },
+        { say: 'Clara', text: "It was never my fault. It was never mine to carry. ...And I'm DONE skipping breakfast for you. Sahur's cancelled, you wooden freak." },
+        { say: 'Tung Tung Tung Sahur', text: "...tung? tung?! NO SKIBIDI! TUNG TUNG TUNG SAHUUUR—!" },
         { battle: 'tung', boss: true },
         { setFlag: 'tung_dead', value: true },
         { ending: true }
@@ -610,8 +654,8 @@
     },
 
     ending: () => ([
-      { say: 'Tung Tung Tung Sahur', text: "...impossible... she... answered... back..." },
-      { say: 'Clara', text: "Tung Tung Tung Sahur. I heard you. And I'm letting you go." },
+      { say: 'Tung Tung Tung Sahur', text: "...t-tung... tralale...ro...... she... answer... back...?" },
+      { say: 'Clara', text: "Tung Tung Tung Sahur. I heard you. The first time, every time. ...And now I'm letting you go." },
       { fade: 'out', dur: 60 },
       { narrate: [
         "The drumming stopped.",
@@ -642,12 +686,20 @@
     ])
   };
 
+  // Maps a speaker's display name to a portrait key (for the dialogue box).
+  const SPEAKER_PORTRAITS = {
+    'Clara': 'clara', 'Haze': 'haze', 'Dr. Samson': 'samson',
+    'Tung Tung Tung Sahur': 'tung', 'Tralalero Tralala': 'tralalero', 'The Hollow Herald': 'herald',
+    'Neighbor': 'woman', 'Kid': 'child', 'Night Nurse': 'innkeep', 'Clerk': 'merchant',
+    'Townsfolk': 'villager', 'Watchman': 'soldier'
+  };
+
   // ---------------------------------------------------------------------------
   // Export
   // ---------------------------------------------------------------------------
   const DATA = {
     PAL, CHARS, TILE_INFO, MAPS, ITEMS, SKILLS, ENEMIES, GROUPS,
-    PARTY_DEFS, SCRIPTS, expForLevel, isSolid,
+    PARTY_DEFS, SCRIPTS, SPEAKER_PORTRAITS, expForLevel, isSolid,
     TILE: 16, VIEW_W: 16, VIEW_H: 12
   };
 
