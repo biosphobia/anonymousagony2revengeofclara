@@ -37,10 +37,10 @@
         .map(n => Object.assign({}, n));
       // default removeFlags for story NPCs
       this.npcs = this.npcs.filter(n => {
-        if (n.id === 'houndmaster' && flags.houndmaster_dead) return false;
-        if (n.id === 'captain' && flags.captain_dead) return false;
-        if (n.id === 'vael' && flags.vael_dead) return false;
-        if (n.id === 'roan' && flags.roan_joined) return false;
+        if (n.id === 'tralalero' && flags.tralalero_dead) return false;
+        if (n.id === 'herald' && flags.herald_dead) return false;
+        if (n.id === 'tung' && flags.tung_dead) return false;
+        if (n.id === 'haze' && flags.haze_joined) return false;
         return true;
       });
       this.objects = (this.map.objects || []).map(o => Object.assign({}, o));
@@ -106,7 +106,7 @@
           // blocked — show deny for locked gate (throttled)
           if (this.tileAt(nx, ny) === 'g' && this._blockDeny <= 0) {
             this._blockDeny = 40;
-            if (global.Game) global.Game.simpleMessage('The keep gate is locked tight.');
+            if (global.Game) global.Game.simpleMessage('The way is sealed. The drum must be sounded first.');
           }
         }
       }
@@ -226,7 +226,7 @@
       const f = (Math.floor(this.animFrame / 40) + n.x) % 8 === 0 ? 1 : 0;
       GFX.drawChar(n.x * TILE - this.camX, n.y * TILE - this.camY, cfg, n.dir || 'down', 0, { walking: false });
       // small "!" marker for the key story NPCs to nudge the player
-      if (n.script && ['elias', 'houndmaster', 'roan', 'captain', 'vael', 'gateguard'].includes(n.script)) {
+      if (n.script && ['samson', 'tralalero', 'haze', 'herald', 'tung', 'wayguard'].includes(n.script)) {
         if (this.animFrame % 80 < 40)
           GFX.text('!', n.x * TILE - this.camX + 7, n.y * TILE - this.camY - 8, { color: '#f0d860', size: 8 });
       }

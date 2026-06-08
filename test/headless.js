@@ -227,13 +227,13 @@ try {
   check('in village explore', Game.mode === 'explore' && Game.state.map === 'village');
   check('party has Clara', Game.state.party.length === 1 && Game.state.party[0].key === 'clara');
 
-  check('talked to Elias', talkTo(15, 9));
+  check('talked to Samson', talkTo(15, 9));
   clearCutscene();
-  check('elias gave items (flag)', !!Game.state.flags.elias_told);
+  check('samson gave items (flag)', !!Game.state.flags.samson_told);
   check('got potions', (Game.state.items.potion || 0) >= 3);
 
   // examine a grave object
-  check('examine grave', talkTo(5, 10));
+  check('examine memory', talkTo(5, 10));
   clearCutscene();
 
   check('save works', Game.save());
@@ -264,9 +264,9 @@ try {
 
   // heal & resupply, then go beat the houndmaster boss
   Game.healParty(); stock();
-  check('reach houndmaster', talkTo(20, 18));
+  check('reach tralalero', talkTo(20, 18));
   resolveStory();
-  check('houndmaster defeated', !!Game.state.flags.houndmaster_dead);
+  check('tralalero defeated', !!Game.state.flags.tralalero_dead);
   check('woods_clear set', !!Game.state.flags.woods_clear);
   check('got iron key', (Game.state.items.iron_key || 0) >= 1);
 
@@ -286,11 +286,11 @@ try {
   talkTo(6, 8); clearCutscene();
   check('inn rested (full hp)', Game.state.party[0].hp === Game.state.party[0].maxhp);
 
-  check('recruit Roan', talkTo(8, 11));
+  check('recruit Haze', talkTo(8, 11));
   clearCutscene();
-  check('roan joined', !!Game.state.flags.roan_joined && Game.state.party.length === 2);
+  check('haze joined', !!Game.state.flags.haze_joined && Game.state.party.length === 2);
 
-  check('talk gate guard', talkTo(14, 18));
+  check('talk watchman', talkTo(14, 18));
   clearCutscene();
   check('gate opened', !!Game.state.flags.gate_open);
 
@@ -301,14 +301,14 @@ try {
 
   // grant some levels so the attack-bot can win the bosses (player would grind/strategize)
   Game.partyGainExp(400); Game.healParty(); stock();
-  check('captain', talkTo(9, 13));
+  check('reach herald', talkTo(9, 13));
   resolveStory();
-  check('captain defeated', !!Game.state.flags.captain_dead);
+  check('herald defeated', !!Game.state.flags.herald_dead);
 
   Game.partyGainExp(600); Game.healParty(); stock();
-  check('vael', talkTo(9, 5));
+  check('reach tung', talkTo(9, 5));
   resolveStory();
-  check('vael defeated', !!Game.state.flags.vael_dead);
+  check('tung defeated', !!Game.state.flags.tung_dead);
   check('reached credits', Game.mode === 'credits');
 
   // pause menu smoke test (after returning to title from credits)

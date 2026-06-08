@@ -572,13 +572,13 @@
 
     _drawEnemyInfo() {
       const liv = this.livingEnemies();
-      const x = GFX.W - 92, y = 30;
+      const x = GFX.W - 120, y = 28;
       // group identical names
       liv.forEach((e, i) => {
         const ry = y + i * 12;
         const targeted = this.targetMode && this.targetMode.side === 'enemy' && this.targetMode.list[this.targetMode.index] === e;
         GFX.text((targeted ? '▶' : ' ') + e.name, x, ry, { color: targeted ? '#fff' : '#d0c0a0', size: 8 });
-        GFX.bar(x + 1, ry + 8, 84, 2, e.hp / e.maxhp, '#c83a3a', '#3a1a1a');
+        GFX.bar(x + 1, ry + 8, 112, 2, e.hp / e.maxhp, '#c83a3a', '#3a1a1a');
       });
     },
 

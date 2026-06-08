@@ -52,20 +52,19 @@
   // Character appearance presets (drawn procedurally in graphics.js)
   // ---------------------------------------------------------------------------
   const CHARS = {
-    clara:   { skin:'#e8c4a0', hair:'#7a2418', style:'long',  shirt:'#2c4a32', pants:'#1c1c24', cape:'#561a1a' },
-    elias:   { skin:'#d8b890', hair:'#c9c9d0', style:'old',   shirt:'#574027', pants:'#3a2c1c' },
-    roan:    { skin:'#cf9e6f', hair:'#4a342a', style:'short', shirt:'#33557a', pants:'#26303a' },
-    woman:   { skin:'#e3bd97', hair:'#b08030', style:'long',  shirt:'#7a5a8a', pants:'#3a2c3a' },
-    child:   { skin:'#e8c4a0', hair:'#5a3a20', style:'short', shirt:'#caa23a', pants:'#3a3a46' },
-    merchant:{ skin:'#d2a878', hair:'#3a3a3a', style:'bald',  shirt:'#2f6a5a', pants:'#26302c' },
-    innkeep: { skin:'#e0b78e', hair:'#7a5a3a', style:'short', shirt:'#8a6a3a', pants:'#4a3a26' },
-    villager:{ skin:'#dcb389', hair:'#43321f', style:'short', shirt:'#566b7a', pants:'#2c343a' },
-    bandit:  { skin:'#c79a6c', hair:'#22201e', style:'hood',  shirt:'#3a2c26', pants:'#221c18' },
-    soldier: { skin:'#c99c70', hair:'#2a2a2a', style:'helm',  shirt:'#4a4a58', pants:'#2c2c34' },
-    houndman:{ skin:'#b8895c', hair:'#1c1a18', style:'hood',  shirt:'#4a2c1c', pants:'#241a14' },
-    captain: { skin:'#c79a6c', hair:'#3a2a1a', style:'helm',  shirt:'#5a3030', pants:'#2c2024' },
-    vael:    { skin:'#cdbfae', hair:'#15151a', style:'hood',  shirt:'#1c1c2a', pants:'#15151c', cape:'#3a0e14' },
-    ghost:   { skin:'#bcd0d8', hair:'#9ab0bc', style:'long',  shirt:'#5a7a86', pants:'#46606a' }
+    clara:    { skin:'#e8c4a0', hair:'#7a2418', style:'long',  shirt:'#2c4a32', pants:'#1c1c24', cape:'#561a1a' },
+    haze:     { skin:'#d6b088', hair:'#161618', style:'short', shirt:'#26262e', pants:'#1a1a20', cape:'#3a1414' },
+    samson:   { skin:'#d8b890', hair:'#b8bcc4', style:'short', shirt:'#cfd2da', pants:'#33384a' },
+    woman:    { skin:'#e3bd97', hair:'#b08030', style:'long',  shirt:'#7a5a8a', pants:'#3a2c3a' },
+    child:    { skin:'#e8c4a0', hair:'#5a3a20', style:'short', shirt:'#caa23a', pants:'#3a3a46' },
+    merchant: { skin:'#d2a878', hair:'#3a3a3a', style:'bald',  shirt:'#2f6a5a', pants:'#26302c' },
+    innkeep:  { skin:'#e0b78e', hair:'#7a5a3a', style:'short', shirt:'#b0c0d0', pants:'#4a5a6a' },
+    villager: { skin:'#dcb389', hair:'#43321f', style:'short', shirt:'#566b7a', pants:'#2c343a' },
+    soldier:  { skin:'#c99c70', hair:'#2a2a2a', style:'helm',  shirt:'#3a4452', pants:'#2c2c34' },
+    tralalero:{ skin:'#3f74b0', hair:'#2b568c', style:'short', shirt:'#3f74b0', pants:'#22406a' },
+    herald:   { skin:'#9a6b2f', hair:'#5e3f18', style:'hood',  shirt:'#7a5223', pants:'#5a3c18' },
+    tung:     { skin:'#b07d33', hair:'#6e4a1f', style:'hood',  shirt:'#8a5e26', pants:'#5e3f18' },
+    ghost:    { skin:'#bcd0d8', hair:'#9ab0bc', style:'long',  shirt:'#5a7a86', pants:'#46606a' }
   };
 
   // ---------------------------------------------------------------------------
@@ -158,7 +157,7 @@
     set(g, 13, H - 2, ':'); set(g, 14, H - 2, ':');
 
     return {
-      id: 'village', name: 'Ashen Village', music: 'village', indoor: false,
+      id: 'village', name: 'Maple Street — 3:00 AM', music: 'village', indoor: false,
       w: W, h: H, tiles: rows(g),
       start: { x: 5, y: 8, dir: 'down' },
       exits: [
@@ -166,13 +165,13 @@
         { x: 14, y: 19, to: 'woods', tx: 14, ty: 1, dir: 'down' }
       ],
       npcs: [
-        { id: 'elias',   x: 15, y: 9,  dir: 'left',  char: 'elias',    name: 'Elias',   script: 'elias' },
-        { id: 'mourner', x: 5,  y: 12, dir: 'up',    char: 'woman',    name: 'Mourner', script: 'mourner' },
-        { id: 'kid',     x: 21, y: 10, dir: 'down',  char: 'child',    name: 'Boy',     script: 'kid' }
+        { id: 'samson',   x: 15, y: 9,  dir: 'left', char: 'samson', name: 'Dr. Samson', script: 'samson' },
+        { id: 'neighbor', x: 5,  y: 12, dir: 'up',   char: 'woman',  name: 'Neighbor',   script: 'neighbor' },
+        { id: 'kid',      x: 21, y: 10, dir: 'down', char: 'child',  name: 'Kid',        script: 'kid' }
       ],
       objects: [
-        { id: 'grave_family', x: 5, y: 10, look: 'grave_family' },
-        { id: 'home_ruin',    x: 5, y: 6,  look: 'home_ruin' }
+        { id: 'memory',     x: 5, y: 10, look: 'memory' },
+        { id: 'door_knock', x: 5, y: 6,  look: 'door_knock' }
       ],
       triggers: [
         { id: 'intro', x: 5, y: 8, once: true, script: 'intro' }
@@ -222,7 +221,7 @@
     // treasure chest (object)
     // houndmaster blocks the path south (NPC on the road)
     return {
-      id: 'woods', name: 'Whispering Woods', music: 'woods', indoor: false,
+      id: 'woods', name: 'The Backwoods', music: 'woods', indoor: false,
       w: W, h: H, tiles: rows(g),
       start: { x: 13, y: 2, dir: 'down' },
       exits: [
@@ -231,13 +230,13 @@
         { x: 25, y: 23, to: 'town', tx: 14, ty: 1, dir: 'down', cond: 'woods_clear', deny: 'woods_blocked' }
       ],
       npcs: [
-        { id: 'houndmaster', x: 20, y: 18, dir: 'up', char: 'houndman', name: 'Houndmaster Grull', script: 'houndmaster' }
+        { id: 'tralalero', x: 20, y: 18, dir: 'up', char: 'tralalero', name: 'Tralalero Tralala', script: 'tralalero' }
       ],
       objects: [
         { id: 'chest_woods', x: 6, y: 9, look: 'chest', chest: { item: 'potion', n: 2 } }
       ],
       triggers: [],
-      encounters: { rate: 0.08, table: ['wolf', 'wolf', 'crow', 'bandit'] }
+      encounters: { rate: 0.08, table: ['hound', 'hound', 'crow', 'sleepwalker'] }
     };
   }
 
@@ -269,7 +268,7 @@
     set(g, 14, 20, 'g'); set(g, 15, 20, 'g');
     set(g, 14, 21, 'D'); set(g, 15, 21, 'D');
     return {
-      id: 'town', name: 'Greyhold', music: 'town', indoor: false,
+      id: 'town', name: 'Cedar Hollow', music: 'town', indoor: false,
       w: W, h: H, tiles: rows(g),
       start: { x: 14, y: 2, dir: 'down' },
       exits: [
@@ -279,11 +278,11 @@
         { x: 15, y: 21, to: 'keep', tx: 10, ty: 22, dir: 'down', cond: 'gate_open', deny: 'gate_locked' }
       ],
       npcs: [
-        { id: 'roan',     x: 8,  y: 11, dir: 'right', char: 'roan',    name: 'Roan',       script: 'roan' },
-        { id: 'innkeep',  x: 6,  y: 8,  dir: 'down',  char: 'innkeep', name: 'Innkeeper',  script: 'inn' },
-        { id: 'merchant', x: 24, y: 8,  dir: 'down',  char: 'merchant',name: 'Pelt',       script: 'shop' },
-        { id: 'gossip',   x: 19, y: 13, dir: 'left',  char: 'villager',name: 'Townsfolk',  script: 'gossip' },
-        { id: 'guard',    x: 14, y: 18, dir: 'down',  char: 'soldier', name: 'Gate Guard', script: 'gateguard' }
+        { id: 'haze',     x: 8,  y: 11, dir: 'right', char: 'haze',     name: 'Haze',      script: 'haze' },
+        { id: 'innkeep',  x: 6,  y: 8,  dir: 'down',  char: 'innkeep',  name: 'Night Nurse', script: 'inn' },
+        { id: 'merchant', x: 24, y: 8,  dir: 'down',  char: 'merchant', name: 'Clerk',     script: 'shop' },
+        { id: 'gossip',   x: 19, y: 13, dir: 'left',  char: 'villager', name: 'Townsfolk', script: 'gossip' },
+        { id: 'guard',    x: 14, y: 18, dir: 'down',  char: 'soldier',  name: 'Watchman',  script: 'wayguard' }
       ],
       objects: [],
       triggers: []
@@ -316,7 +315,7 @@
     set(g, 9, 2, 't'); set(g, 10, 2, 't'); // throne (table tiles)
     set(g, 5, 4, 'P'); set(g, 14, 4, 'P');
     return {
-      id: 'keep', name: "Vael's Keep", music: 'keep', indoor: true,
+      id: 'keep', name: 'The Hour Between', music: 'keep', indoor: true,
       w: W, h: H, tiles: rows(g),
       start: { x: 9, y: 22, dir: 'up' },
       exits: [
@@ -324,15 +323,15 @@
         { x: 10, y: 23, to: 'town', tx: 15, ty: 20, dir: 'down' }
       ],
       npcs: [
-        { id: 'captain', x: 9,  y: 13, dir: 'down', char: 'captain', name: 'Captain Dross', script: 'captain' },
-        { id: 'vael',    x: 9,  y: 5,  dir: 'down', char: 'vael',    name: 'Lord Vael',    script: 'vael' }
+        { id: 'herald', x: 9, y: 13, dir: 'down', char: 'herald', name: 'The Hollow Herald',     script: 'herald' },
+        { id: 'tung',   x: 9, y: 5,  dir: 'down', char: 'tung',   name: 'Tung Tung Tung Sahur', script: 'tung' }
       ],
       objects: [
         { id: 'chest_keep', x: 3, y: 18, look: 'chest', chest: { item: 'elixir', n: 1 } },
         { id: 'chest_keep2', x: 16, y: 18, look: 'chest', chest: { item: 'tonic', n: 3 } }
       ],
       triggers: [
-        { id: 'keep_enter', x: 9, y: 21, once: true, script: 'keep_enter' }
+        { id: 'lair_enter', x: 9, y: 21, once: true, script: 'lair_enter' }
       ]
     };
   }
@@ -348,12 +347,12 @@
   // Items
   // ---------------------------------------------------------------------------
   const ITEMS = {
-    potion:  { name: 'Potion',   kind: 'heal',   amount: 35, price: 18, desc: 'Restores 35 HP.' },
-    hipotion:{ name: 'Hi-Potion',kind: 'heal',   amount: 80, price: 55, desc: 'Restores 80 HP.' },
-    tonic:   { name: 'Tonic',    kind: 'mp',     amount: 18, price: 22, desc: 'Restores 18 MP.' },
-    bandage: { name: 'Bandage',  kind: 'cure',   amount: 18, price: 12, desc: 'Heals 18 HP and stops bleeding.' },
-    elixir:  { name: 'Elixir',   kind: 'full',   amount: 0,  price: 200,desc: 'Fully restores HP and MP.' },
-    iron_key:{ name: 'Iron Key', kind: 'key',    amount: 0,  price: 0,  desc: "Opens the keep's gate." }
+    potion:  { name: 'Painkillers',  kind: 'heal', amount: 35, price: 18, desc: 'Dulls the pain. Restores 35 HP.' },
+    hipotion:{ name: 'First-Aid Kit',kind: 'heal', amount: 80, price: 55, desc: 'Restores 80 HP.' },
+    tonic:   { name: 'Energy Drink', kind: 'mp',   amount: 18, price: 22, desc: 'Restores 18 WP (willpower).' },
+    bandage: { name: 'Bandage',      kind: 'cure', amount: 18, price: 12, desc: 'Heals 18 HP and stops bleeding.' },
+    elixir:  { name: 'Strong Coffee',kind: 'full', amount: 0,  price: 200,desc: 'Fully restores HP and WP.' },
+    iron_key:{ name: 'Kentungan Mallet', kind: 'key', amount: 0, price: 0, desc: 'A wooden drum-beater. Sound it to open the way between the hours.' }
   };
 
   // ---------------------------------------------------------------------------
@@ -374,25 +373,24 @@
   // Enemies
   // ---------------------------------------------------------------------------
   const ENEMIES = {
-    wolf:    { name: 'Gaunt Wolf',  hp: 16,  atk: 6,  def: 2,  spd: 7, exp: 12, gold: 5,  art: 'wolf' },
-    crow:    { name: 'Carrion Crow',hp: 10,  atk: 5,  def: 1,  spd: 9, exp: 8,  gold: 3,  art: 'crow' },
-    bandit:  { name: 'Road Bandit', hp: 24,  atk: 8,  def: 3,  spd: 5, exp: 20, gold: 14, art: 'bandit',
-               skills: [{ chance: 0.25, skill: 'rend' }] },
-    soldier: { name: "Vael's Soldier", hp: 40, atk: 12, def: 6, spd: 5, exp: 28, gold: 18, art: 'soldier' },
-    houndmaster: { name: 'Houndmaster Grull', hp: 78, atk: 12, def: 5, spd: 6, exp: 60, gold: 60, art: 'houndman', boss: true,
-                   drop: 'iron_key',
-                   skills: [{ chance: 0.30, skill: 'rend' }] },
-    captain: { name: 'Captain Dross', hp: 140, atk: 15, def: 8, spd: 6, exp: 95, gold: 120, art: 'captain', boss: true,
-               skills: [{ chance: 0.3, skill: 'sunder' }] },
-    vael:    { name: 'Lord Vael', hp: 280, atk: 18, def: 10, spd: 8, exp: 0, gold: 0, art: 'vael', boss: true, noRun: true,
-               skills: [{ chance: 0.30, skill: 'reckoning' }, { chance: 0.25, skill: 'rend' }] }
+    hound:      { name: 'Night Hound',  hp: 16,  atk: 6,  def: 2,  spd: 7, exp: 12, gold: 5,  art: 'wolf' },
+    crow:       { name: 'Omen Crow',    hp: 10,  atk: 5,  def: 1,  spd: 9, exp: 8,  gold: 3,  art: 'crow' },
+    sleepwalker:{ name: 'Sleepwalker',  hp: 24,  atk: 8,  def: 3,  spd: 5, exp: 20, gold: 14, art: 'bandit',
+                  skills: [{ chance: 0.25, skill: 'rend' }] },
+    tralalero:  { name: 'Tralalero Tralala', hp: 78, atk: 12, def: 5, spd: 9, exp: 60, gold: 60, art: 'tralalero', boss: true,
+                  drop: 'iron_key',
+                  skills: [{ chance: 0.30, skill: 'rend' }] },
+    herald:     { name: 'The Hollow Herald', hp: 140, atk: 15, def: 8, spd: 6, exp: 95, gold: 120, art: 'herald', boss: true,
+                  skills: [{ chance: 0.3, skill: 'sunder' }] },
+    tung:       { name: 'Tung Tung Tung Sahur', hp: 280, atk: 18, def: 10, spd: 8, exp: 0, gold: 0, art: 'tung', boss: true, noRun: true,
+                  skills: [{ chance: 0.30, skill: 'reckoning' }, { chance: 0.25, skill: 'rend' }] }
   };
 
   // Encounter groups for the woods random table -> arrays of enemy keys
   const GROUPS = {
-    wolf:   () => Math.random() < 0.3 ? ['wolf', 'wolf'] : ['wolf'],
-    crow:   () => Math.random() < 0.5 ? ['crow'] : ['crow', 'wolf'],
-    bandit: () => ['bandit']
+    hound: () => Math.random() < 0.3 ? ['hound', 'hound'] : ['hound'],
+    crow:  () => Math.random() < 0.5 ? ['crow'] : ['crow', 'hound'],
+    sleepwalker: () => ['sleepwalker']
   };
 
   // ---------------------------------------------------------------------------
@@ -405,9 +403,9 @@
       growth: { hp: 10, mp: 3, atk: 2, def: 1, spd: 0.6 },
       skillsByLevel: { 1: ['vengeance', 'mend'], 2: ['rend'], 5: ['reckoning'] }
     },
-    roan: {
-      name: 'Roan', char: 'roan',
-      base: { hp: 46, mp: 10, atk: 9, def: 6, spd: 5 },
+    haze: {
+      name: 'Haze', char: 'haze',
+      base: { hp: 48, mp: 10, atk: 10, def: 6, spd: 6 },
       growth: { hp: 11, mp: 2, atk: 2, def: 1, spd: 0.5 },
       skillsByLevel: { 1: ['sunder', 'patch'], 3: ['rally'] }
     }
@@ -428,61 +426,79 @@
         "— Clara's Revenge —"
       ] },
       { narrate: [
-        "They came in the night and called it justice.",
-        "They burned Ashen Village. They took everything.",
-        "They left a girl named Clara for dead in the ash."
+        "Years ago, in the house on Maple Street,",
+        "something happened to a ten-year-old girl",
+        "that no child should ever survive."
       ] },
       { narrate: [
-        "She did not die.",
-        "Some prayers are answered. Hers was not a prayer.",
-        "It was a promise."
+        "Her brother Haze — the one the news called",
+        "'the Anonymous' — made the men responsible",
+        "disappear. Then the courts made him disappear too.",
+        "",
+        "Clara grew up alone, with the quiet. And the guilt."
+      ] },
+      { narrate: [
+        "Lately, in the dead hour before dawn,",
+        "Maple Street hears it.  Tung.  Tung.  Tung.",
+        "",
+        "Old folk say: when the sahur drum calls, you answer.",
+        "Ignore it three times, and IT comes to your door —",
+        "and takes you into the hour that has no name."
+      ] },
+      { narrate: [
+        "Three neighbors are already gone.",
+        "",
+        "Tonight Clara woke at 3:00 AM to knocking.",
+        "She did not answer. Not once. Not twice.",
+        "The third knock has already come."
       ] },
       { fade: 'in', dur: 40 },
-      { say: "Clara", text: "...The ash is cold now. Good. Cold things keep." },
-      { say: "Clara", text: "Lord Vael. Captain Dross. The Houndmaster. I remember every name." },
-      { say: null, text: "(Find Elias by the well. He may know where the others went.)" }
+      { say: "Clara", text: "Tung Tung Tung Sahur. I heard you the first time." },
+      { say: "Clara", text: "I've spent my whole life being taken from. Not tonight. Tonight I take it back." },
+      { say: null, text: "(Dr. Samson is waiting out by the porch light. Talk to him.)" }
     ]),
 
-    elias: (ctx) => {
-      if (ctx.flags.vael_dead) return [
-        { say: 'Elias', text: "It's over, then. You did it, child. Rest now — you've earned it." }
+    samson: (ctx) => {
+      if (ctx.flags.tung_dead) return [
+        { say: 'Dr. Samson', text: "Dawn came. After all these years, you finally let it. Rest now, Clara." }
       ];
-      if (ctx.flags.elias_told) return [
-        { say: 'Elias', text: "Vael's men hold Greyhold, south through the Whispering Woods. Be careful, Clara." },
-        { say: 'Elias', text: "And mind the Houndmaster on the forest road. He took such joy in the burning." }
+      if (ctx.flags.samson_told) return [
+        { say: 'Dr. Samson', text: "Through the backwoods to Cedar Hollow. Sound the drum, and the way between the hours will open." },
+        { say: 'Dr. Samson', text: "It feeds on the sleepless and the guilty, Clara. Don't give it your guilt. Give it nothing." }
       ];
       return [
-        { say: 'Elias', text: "Spirits — Clara? You're alive. I buried you in my heart a year ago." },
-        { say: 'Clara', text: "I came back for them, Elias. All of them. Where are they?" },
-        { say: 'Elias', text: "Vael rules from his keep beyond Greyhold town, south through the Whispering Woods." },
-        { say: 'Elias', text: "His Houndmaster, Grull, prowls the forest road. He led the men who lit the torches." },
-        { say: 'Clara', text: "Then the road begins with him." },
-        { say: 'Elias', text: "Take this — an old sword of mine, and what coin I have. Make it count." },
+        { say: 'Dr. Samson', text: "Clara. You called at three in the morning and I came. Old habits — you were my patient a long time." },
+        { say: 'Clara', text: "It's real, isn't it. The thing the grandmothers warned about. It took the Hendersons. The boy two doors down." },
+        { say: 'Dr. Samson', text: "Tung Tung Tung Sahur. It comes for those who won't answer the call — the sleepless, the guilt-ridden." },
+        { say: 'Dr. Samson', text: "It has been circling you for years, Clara. You are exactly the meal it likes." },
+        { say: 'Clara', text: "Then I'll stop running from it. Where do I find it?" },
+        { say: 'Dr. Samson', text: "South, through the backwoods, to Cedar Hollow. Take Haze's old bat. And take these — you'll need them." },
         { give: 'potion', n: 3 },
         { gold: 30 },
-        { setFlag: 'elias_told', value: true },
-        { say: null, text: "(Received 3 Potions and 30 gold. Head south to the Whispering Woods.)" }
+        { setFlag: 'samson_told', value: true },
+        { say: null, text: "(Received 3x Painkillers and 30 gold. Head south into the backwoods.)" }
       ];
     },
 
-    mourner: () => ([
-      { say: 'Mourner', text: "I lay flowers for the dead each dawn. Soon there will be more graves, won't there." },
-      { say: 'Mourner', text: "...I see it in your eyes, girl. Go. Just come back, if you can." }
+    neighbor: () => ([
+      { say: 'Neighbor', text: "I keep the porch light on and I answer every single time it knocks. Every time." },
+      { say: 'Neighbor', text: "You're going AFTER it? ...God. Don't ignore the drum, Clara. Whatever you do." }
     ]),
 
-    kid: (ctx) => ctx.flags.vael_dead ? [
-      { say: 'Boy', text: "You're the lady who beat the bad lord! Will you teach me to be brave?" }
+    kid: (ctx) => ctx.flags.tung_dead ? [
+      { say: 'Kid', text: "I slept all night! No knocking! You really got it, didn't you?" }
     ] : [
-      { say: 'Boy', text: "My da says a ghost walks the ruins. But you're not a ghost... are you?" }
+      { say: 'Kid', text: "I'm not s'posed to be up. But if I close my eyes I hear the tung-tung-tung..." }
     ],
 
-    grave_family: () => ([
-      { say: null, text: "Three graves, unmarked. You know whose they are. You dug them yourself." },
-      { say: 'Clara', text: "...I'm not done. Not yet." }
+    memory: () => ([
+      { say: null, text: "Haze's old room. His jacket still hangs on the door. A photo of two kids who didn't know yet." },
+      { say: 'Clara', text: "...You hunted monsters for me, big brother. My turn." }
     ]),
 
-    home_ruin: () => ([
-      { say: null, text: "Charred timber and ash. Home, once. Nothing left to save here." }
+    door_knock: () => ([
+      { say: null, text: "The front door. Three pale dents in the wood, at exactly the height of a wooden bat." },
+      { say: null, text: "tung... tung... tung..." }
     ]),
 
     chest: (ctx, obj) => {
@@ -494,37 +510,36 @@
       ];
     },
 
-    houndmaster: (ctx) => {
-      if (ctx.flags.houndmaster_dead) return [
-        { say: null, text: "Grull's body lies cooling on the road. The way south is open." }
+    tralalero: (ctx) => {
+      if (ctx.flags.tralalero_dead) return [
+        { say: null, text: "The shark-thing is gone. Its mallet lies in the leaves. The drum can be sounded now." }
       ];
       return [
-        { say: 'Houndmaster Grull', text: "Well, well. A ghost with a grudge. I burned a hundred like you." },
-        { say: 'Clara', text: "You burned my family. You laughed while they screamed." },
-        { say: 'Houndmaster Grull', text: "I did! Ha! Shall I do it again, little—" },
-        { say: 'Clara', text: "No. This is where you stop." },
-        { battle: 'houndmaster', boss: true },
-        { setFlag: 'houndmaster_dead', value: true },
+        { say: '???', text: "Tralalero tralala! Porco shark on the path, porco SHARK!" },
+        { say: 'Clara', text: "...A shark. In sneakers. In the woods. Of course." },
+        { say: 'Tralalero Tralala', text: "Sahur sent me, bambina! No one reaches the drum tower! Tralalala!" },
+        { say: 'Clara', text: "Move, or be moved." },
+        { battle: 'tralalero', boss: true },
+        { setFlag: 'tralalero_dead', value: true },
         { setFlag: 'woods_clear', value: true },
-        { say: 'Houndmaster Grull', text: "...heh... the master... will... gut you..." },
-        { say: null, text: "(Grull dropped an Iron Key. The keep's gate will open now.)" },
-        { say: 'Clara', text: "One." }
+        { say: 'Tralalero Tralala', text: "...tralala... lero...... la..." },
+        { say: null, text: "(It dropped the Kentungan Mallet. The way to the hour between can be opened now.)" }
       ];
     },
 
-    roan: (ctx) => {
-      if (ctx.flags.roan_joined) return [
-        { say: 'Roan', text: "Lead on. Dross and Vael won't kill themselves... more's the pity." }
+    haze: (ctx) => {
+      if (ctx.flags.haze_joined) return [
+        { say: 'Haze', text: "Lead on, sis. The Herald and the big one are waiting. Let's finish it." }
       ];
       return [
-        { say: 'Roan', text: "You're the one who put down Grull. The whole town's whispering." },
-        { say: 'Clara', text: "And you are?" },
-        { say: 'Roan', text: "Roan. Vael's men hanged my brother for 'sedition.' I've a debt to settle too." },
-        { say: 'Roan', text: "Two blades are better than one against Captain Dross. Let me come with you." },
-        { say: 'Clara', text: "...Keep up, then." },
-        { join: 'roan' },
-        { setFlag: 'roan_joined', value: true },
-        { say: null, text: "(Roan joined your party!)" }
+        { say: '???', text: "Still picking fights with monsters, huh. You get that from me." },
+        { say: 'Clara', text: "...Haze? No. You're — the courts took you. You're not—" },
+        { say: 'Haze', text: "Real? Out here, in the hour between, 'real' gets pretty thin. The thing took me before it took the neighbors." },
+        { say: 'Haze', text: "I couldn't protect you back then, not really. Let me stand with you for this one. One last time." },
+        { say: 'Clara', text: "...Okay. Okay. Keep up, big brother." },
+        { join: 'haze' },
+        { setFlag: 'haze_joined', value: true },
+        { say: null, text: "(Haze — the Anonymous — joined your party!)" }
       ];
     },
 
@@ -537,83 +552,85 @@
     ]),
 
     gossip: (ctx) => ctx.flags.gate_open ? [
-      { say: 'Townsfolk', text: "You opened the keep gate? Spirits keep you. Nobody comes back from up there." }
+      { say: 'Townsfolk', text: "You sounded the drum? You opened the WAY? Nobody comes back from the hour between..." }
     ] : [
-      { say: 'Townsfolk', text: "The keep gate's barred from inside. Only Dross's iron key works it." },
-      { say: 'Townsfolk', text: "...Wait. That key Grull carried? You have it? Then Greyhold owes you a prayer." }
+      { say: 'Townsfolk', text: "The way to the tower only opens to the kentungan mallet — the drum-beater itself." },
+      { say: 'Townsfolk', text: "They say the shark-thing in the woods carried it. If you've got it... Cedar Hollow will pray for you." }
     ],
 
-    gateguard: (ctx) => {
+    wayguard: (ctx) => {
       if (ctx.flags.gate_open) return [
-        { say: 'Gate Guard', text: "The gate's open. The Lord's reckoning is yours to deliver." }
+        { say: 'Watchman', text: "The way's open. Whatever's in there... end it, kid." }
       ];
       if (ctx.hasItem('iron_key')) return [
-        { say: 'Gate Guard', text: "That's... the Iron Key. Grull's key. Then he's truly dead." },
-        { say: 'Gate Guard', text: "I've no love for Vael. I'll work the lock. The keep is yours." },
+        { say: 'Watchman', text: "That's the kentungan mallet. From the old drum tower. You really took it off that thing." },
+        { say: 'Clara', text: "Stand back." },
+        { say: null, text: "Clara raises the mallet and strikes the silent drum.  TUNG. TUNG. TUNG." },
         { setFlag: 'gate_open', value: true },
-        { say: null, text: "(The gate to the keep grinds open.)" }
+        { say: null, text: "(The air splits open. The way to the hour between yawns wide.)" }
       ];
       return [
-        { say: 'Gate Guard', text: "The keep gate won't open without the Iron Key. The Houndmaster kept it." }
+        { say: 'Watchman', text: "The way won't open without the kentungan mallet. The drum has to be sounded." }
       ];
     },
 
-    keep_enter: () => ([
-      { say: 'Clara', text: "The keep. After all this time. I can still smell the smoke." },
-      { say: null, text: "(Captain Dross waits in the hall ahead. Lord Vael, beyond.)" }
+    lair_enter: () => ([
+      { say: 'Clara', text: "The hour between. No dawn, no dusk. Just... waiting." },
+      { say: 'Haze', text: "The Hollow Herald keeps the inner door. The big one — Sahur — is past it. Ready?" },
+      { say: 'Clara', text: "I've been ready since I was ten." }
     ]),
 
-    captain: (ctx) => {
-      if (ctx.flags.captain_dead) return [
-        { say: null, text: "Captain Dross is dead. The stairs to the throne room lie open." }
+    herald: (ctx) => {
+      if (ctx.flags.herald_dead) return [
+        { say: null, text: "The Herald's drum lies split in two. The inner door stands open." }
       ];
       return [
-        { say: 'Captain Dross', text: "Halt. No one sees the Lord. Especially not dead girls who won't stay buried." },
-        { say: 'Clara', text: "You gave the order, Dross. 'Leave no one.' I heard you say it." },
-        { say: 'Captain Dross', text: "Orders are orders. I sleep fine." },
-        { say: 'Clara', text: "Then sleep." },
-        { battle: 'captain', boss: true },
-        { setFlag: 'captain_dead', value: true },
-        { say: 'Captain Dross', text: "...should have... made sure..." },
-        { say: 'Clara', text: "Two. Only the Lord remains." }
+        { say: 'The Hollow Herald', text: "tung. tung. tung. you would not answer. now you are answered FOR." },
+        { say: 'Clara', text: "You knocked on my door for years. Let me knock back." },
+        { battle: 'herald', boss: true },
+        { setFlag: 'herald_dead', value: true },
+        { say: 'Haze', text: "Just the big one left, Clara. Whatever it says to you in there — don't believe it." }
       ];
     },
 
-    vael: (ctx) => {
-      if (ctx.flags.vael_dead) return [
-        { say: null, text: "Lord Vael's throne is empty. Only ash remains — as it should be." }
+    tung: (ctx) => {
+      if (ctx.flags.tung_dead) return [
+        { say: null, text: "Where the creature stood, only a plain wooden drum-beater remains. The hour is over." }
       ];
       return [
-        { say: 'Lord Vael', text: "So the rumor walks. The girl from Ashen Village. I'd thought you a story." },
-        { say: 'Clara', text: "You burned my home for a tax I couldn't pay. You called it 'order.'" },
-        { say: 'Lord Vael', text: "I call it the cost of peace. One village, that others might fear and obey." },
-        { say: 'Lord Vael', text: "You've come for vengeance. How quaint. It changes nothing." },
-        { say: 'Clara', text: "It changes you. From living to dead. That's enough." },
-        { battle: 'vael', boss: true },
-        { setFlag: 'vael_dead', value: true },
+        { say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... little Clara. you never answered me. so i kept... knocking." },
+        { say: 'Clara', text: "You've been the sound under everything. Every sleepless night since I was ten." },
+        { say: 'Tung Tung Tung Sahur', text: "i am your guilt with a face and a bat. you cannot kill your own guilt, bambina." },
+        { say: 'Haze', text: "She's not alone with it anymore. Tell him, sis." },
+        { say: 'Clara', text: "It was never my fault. It was never my guilt to carry. ...And I am done feeding you." },
+        { battle: 'tung', boss: true },
+        { setFlag: 'tung_dead', value: true },
         { ending: true }
       ];
     },
 
     ending: () => ([
-      { say: 'Lord Vael', text: "...impossible... a single girl... from the ashes..." },
-      { say: 'Clara', text: "Not from the ashes. I AM the ashes. And ash remembers." },
+      { say: 'Tung Tung Tung Sahur', text: "...impossible... she... answered... back..." },
+      { say: 'Clara', text: "Tung Tung Tung Sahur. I heard you. And I'm letting you go." },
       { fade: 'out', dur: 60 },
       { narrate: [
-        "Lord Vael fell. The keep went quiet.",
-        "Three names struck through. The promise kept."
+        "The drumming stopped.",
+        "For the first time in years, the hour before dawn",
+        "was simply... quiet."
       ] },
       { narrate: [
-        "Clara walked back through Greyhold, then the woods,",
-        "then the cold ruins of Ashen Village —",
-        "to three unmarked graves."
-      ] },
-      { narrate: [
-        "She knelt. For the first time in a year,",
-        "she let herself weep.",
+        "Haze walked her back to the edge of the hour.",
+        "He couldn't follow into the morning. They both knew it.",
         "",
-        "The agony did not leave her.",
-        "But it was, at last, her own."
+        "\"Go to sleep, sis,\" he said. \"You earned it.\""
+      ] },
+      { narrate: [
+        "On Maple Street the sun came up.",
+        "Clara stood on the porch and, at last,",
+        "let herself cry — and then breathe.",
+        "",
+        "The agony did not vanish.",
+        "But it was, at last, only hers. And it was quiet."
       ] },
       { narrate: [
         "— THE END —",
