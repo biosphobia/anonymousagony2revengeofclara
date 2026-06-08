@@ -15,7 +15,7 @@
   // ---- Opening vengeance credits config -------------------------------------
   // Upload the song to this path in the repo. The credits sequence is synced to
   // the audio's own playback clock, so timing matches whatever file is here.
-  const CREDITS_SONG_SRC = 'https://github.com/biosphobia/anonymousagony2revengeofclara/blob/claude/vibrant-goldberg-KryZ2/assets/down-with-the-sickness.mp3';
+  const CREDITS_SONG_SRC = 'https://github.com/biosphobia/anonymousagony2revengeofclara/raw/refs/heads/claude/vibrant-goldberg-KryZ2/assets/down-with-the-sickness.mp3';
   // End the credits at the end of the first chorus (seconds). Tweak to match
   // your upload exactly. Falls back to a timer if the audio can't play.
   const CREDITS_END_SEC = 122;
