@@ -153,6 +153,9 @@
       if (this.effect === 'glitch') drawGlitch(ctx, this.gT, W, H);
       ctx.restore();
 
+      // gritty overlay (heavier when an FX is active)
+      GFX.edge(this.gT / 16, this.effect === 'glitch' ? 1.2 : 0.9);
+
       // letterbox
       ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, 16); ctx.fillRect(0, H - 16, W, 16);
 
@@ -444,10 +447,12 @@
     P({ move: 'haze', x: C, dur: 1700 });
     P({ say: 'Haze', text: "Clara? I got that dumb game you wanted. ...Clara?" });
     P({ wait: 700 });
-    P({ say: 'Haze', text: "...Why's the door shut. Clara, open the door." });
-    P({ shake: 3, dur: 600 });
-    P({ say: 'Haze', text: "CLARA—" });
-    P({ flash: '#fff', dur: 500 }); P({ sfx: 'crit' }); P({ shake: 6, dur: 700 });
+    P({ say: 'Haze', text: "...Why's the door shut. Clara, OPEN THE DOOR." });
+    P({ shake: 4, dur: 600 }); P({ effect: 'glitch' });
+    P({ say: 'Haze', text: "CLARA—!" });
+    P({ flash: '#a00e16', dur: 600 }); P({ sfx: 'crit' }); P({ shake: 9, dur: 900 });
+    P({ flash: '#ffffff', dur: 300 }); P({ shake: 7, dur: 500 });
+    P({ effect: null });
     P({ fade: 'out', dur: 1500 });
     P({ bg: 'black' });
     P({ narrate: ['Some doors, once opened,', 'never close again.'], dur: 4000 });
@@ -549,10 +554,11 @@
     P({ say: 'Clara', text: "One." });
     P({ sfx: 'knock', flash: '#fff', dur: 200 }); P({ shake: 2, dur: 300 }); P({ wait: 500 });
     P({ say: 'Clara', text: "Two. ...don't answer. for ONCE in your life don't—" });
-    P({ sfx: 'knock', flash: '#fff', dur: 260 }); P({ shake: 4, dur: 500 }); P({ wait: 700 });
-    P({ camera: { zoom: 1.2, y: -8 }, dur: 1400 });
+    P({ sfx: 'knock', flash: '#a00e16', dur: 300 }); P({ shake: 6, dur: 600 }); P({ wait: 600 });
+    P({ effect: 'glitch' });
+    P({ camera: { zoom: 1.25, y: -8 }, dur: 1200 });
     P({ actor: 'tung', x: C, y: G + 4, dir: 'down', scale: 3.4 });
-    P({ flash: '#7a0e14', dur: 500 }); P({ shake: 4, dur: 700 });
+    P({ flash: '#7a0e14', dur: 600 }); P({ shake: 7, dur: 900 });
     P({ say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... sahuuur~ bambina Claraaa. three knock! tralalero tralala, you let me in again, si?" });
     P({ say: 'Clara', text: "...No. You're not at the door. You never were. You're in my head. You've been in my head since I was eleven." });
     P({ say: 'Tung Tung Tung Sahur', text: "siii, in the head, in the walls, in the quiet! bombardiro crocodilo, I am your shame with a silly little voice — easier to keep that way, no?" });
@@ -561,7 +567,8 @@
     P({ setAnim: 'clara', anim: null }); P({ face: 'clara', dir: 'right' });
     P({ say: 'Clara', text: "He spent his whole life making sure people like you couldn't hide. ...It's my turn to stop hiding from you." });
     P({ say: 'Clara', text: "So. One more time. Come on. Let's walk through every room of it. Together." });
-    P({ flash: '#fff', dur: 500 }); P({ shake: 5, dur: 600 });
+    P({ flash: '#ffffff', dur: 500 }); P({ shake: 6, dur: 700 });
+    P({ effect: null });
     P({ camera: { zoom: 1, y: 0 }, dur: 800 });
     P({ fade: 'out', dur: 1400 });
     P({ bg: 'black' });

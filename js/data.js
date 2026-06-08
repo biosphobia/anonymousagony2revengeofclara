@@ -199,8 +199,8 @@
   const S = {
     // ---- street ----
     street_arrive: () => ([
-      { say: 'Clara', text: "...The old house on Maple Street. I swore I'd never come back here." },
-      { say: 'Clara', text: "But the knocking won't stop until I do. ...Okay. In we go." },
+      { say: 'Clara', text: "...The old house on Maple Street. I swore I'd burn it down before I ever set foot here again." },
+      { say: 'Clara', text: "But the knocking doesn't stop. Not for years. Not for screaming into a pillow. ...Fine. We do this the hard way." },
       { say: null, text: "(Go through the front door.)" }
     ]),
     neighbor: (ctx) => ctx.flags.tung_done ? [
@@ -251,8 +251,8 @@
         { say: null, text: "My old laptop. Still logged in. The chat window blinks awake on its own." },
         { say: 'Tung Tung Tung Sahur', text: "tung tung tung~ ciao bambina! you remember me? tralalero tralala, your bestest friend from the screen!" },
         { say: 'Tung Tung Tung Sahur', text: "so nice, so patient, so many secrets we keep, no? bombardiro crocodilo... open the door for me, piccolina, you always do~" },
-        { say: 'Clara', text: "...You were never a friend. You were never even a person. You were a mouth in the dark wearing a clown costume." },
-        { say: 'Clara', text: "And I was eleven." },
+        { say: 'Clara', text: "...You were never a friend. You were a grown man with a clown's voice and a kid's screen name rotting in your teeth." },
+        { say: 'Clara', text: "And I was eleven, you son of a bitch." },
         { setFlag: 'laptop_seen', value: true }
       ];
     },
@@ -356,10 +356,10 @@
         { goto: 'tung_climax' }
       ];
       return [
-        { say: 'Clara', text: "I was ELEVEN. You were the adult. You were the predator. The shame was always yours — I just carried it for you because I was small and you were heavy." },
-        { say: 'Clara', text: "Haze knew. Haze made sure you and every one of you could never do it again. It cost him everything. I'm not going to waste it being afraid of a cartoon." },
-        { say: 'Tung Tung Tung Sahur', text: "t-tung...? tralale...ro...? bambina, no, we have a GAME, we have—" },
-        { say: 'Clara', text: "Game's over. Get out of my room." },
+        { say: 'Clara', text: "I was ELEVEN. You were the grown-up. You were the predator. The shame was always yours — I just hauled it around for twelve years because I was small and you were heavy." },
+        { say: 'Clara', text: "Haze made sure you and every animal like you got buried where you couldn't crawl back out. It cost him his whole life. I am NOT wasting that flinching at a wooden clown." },
+        { say: 'Tung Tung Tung Sahur', text: "t-tung...? tralale...ro...? bambina, no, we have a GAME, we have a—" },
+        { say: 'Clara', text: "Game's over. Get the hell out of my head." },
         { sfx: 'knock' }, { flash: '#ffffff', dur: 700 }, { shake: 6, dur: 800 },
         { setFlag: 'tung_done', value: true },
         { ending: true }

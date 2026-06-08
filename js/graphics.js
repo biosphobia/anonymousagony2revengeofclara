@@ -139,6 +139,23 @@
       this._rrPath(x, y, w, h, h / 2); ctx.lineWidth = 0.7; ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.stroke();
     },
 
+    // Gritty post overlay: vignette + scanlines + film grain + red dread pulse.
+    edge(frame, k) {
+      k = k == null ? 1 : k;
+      const ctx = this.ctx, W = this.W, H = this.H;
+      const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.22, W / 2, H / 2, W * 0.62);
+      vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,' + (0.6 * k) + ')');
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      ctx.globalAlpha = 0.08 * k; ctx.fillStyle = '#000';
+      for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+      ctx.globalAlpha = 0.07 * k;
+      for (let i = 0; i < 90; i++) { ctx.fillStyle = Math.random() < 0.5 ? '#000' : '#fff'; ctx.fillRect((Math.random() * W) | 0, (Math.random() * H) | 0, 1, 1); }
+      ctx.restore();
+      const pulse = Math.sin(frame / 45) * Math.sin(frame / 13);
+      if (pulse > 0.82) { ctx.save(); ctx.globalAlpha = 0.07 * k; ctx.fillStyle = '#c81020'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+    },
+
     _hash(x, y) {
       let h = (x * 374761393 + y * 668265263) ^ 0x9e3779b9;
       h = (h ^ (h >> 13)) * 1274126177;

@@ -175,7 +175,7 @@
       this.credits = { y: GFX.H + 10, lines: [
         'ANONYMOUS AGONY II', "Clara's Revenge", '', 'THE END', '',
         'A grounded story about', 'surviving, and refusing the blame.', '',
-        'duugu & gab', 'every single role', '',
+        'duugu, gab & taki', 'every single role', '',
         'In memory of every Haze', 'who refused to look away.', '',
         'Press Z to return to the title.'
       ] };
@@ -245,6 +245,8 @@
     },
 
     _updateExplore() {
+      // rare distant knock indoors, for dread
+      if (World.map && World.map.indoor) { this._ambT = (this._ambT || 700) - 1; if (this._ambT <= 0) { this._ambT = 800 + (Math.random() * 1000 | 0); Sound.sfx('knock'); } }
       World.update(true);
       if (this.mode !== 'explore') return;
       if (Input.justPressed('confirm')) {
@@ -293,7 +295,9 @@
         case 'opencredits': this._renderOpenCredits(); break;
         case 'credits': this._renderCredits(); break;
         default:
-          World.render(); this._renderHud(); this._drawFade();
+          World.render();
+          if (this.mode === 'explore' || this.mode === 'cutscene' || this.mode === 'menu') GFX.edge(this.frame, World.map && World.map.indoor ? 1.05 : 0.85);
+          this._renderHud(); this._drawFade();
           if (this.mode === 'cutscene') { if (this.narration) this._renderNarration(); else if (this.ev && this.ev.waiting === 'choice') this._renderChoice(); else Dialogue.render(); }
           else if (this.mode === 'menu') this._renderPause();
           break;
@@ -346,6 +350,7 @@
       GFX.drawChar((GFX.W / 2) - 8, 150, DATA.CHARS.clara, 'down', 0, {});
       GFX.text('ANONYMOUS AGONY II', GFX.W / 2, 42, { color: '#d8c0b0', size: 16, align: 'center', shadowColor: '#3a1010' });
       GFX.text("Clara's Revenge", GFX.W / 2, 70, { color: '#c83a3a', size: 13, align: 'center', shadowColor: '#200' });
+      GFX.edge(this.frame, 0.95);
       this.titleMenu.render();
       GFX.text('Z: select   M: mute   V: voice', GFX.W / 2, GFX.H - 12, { color: '#6a5a5a', size: 8, align: 'center' });
     },
@@ -401,11 +406,15 @@
       const cardA = Math.min(1, (1 - Math.abs(cardLocal - 0.5) * 2) * 2.2);
       ctx.save(); ctx.globalAlpha = cardA;
       GFX.text(oc.roles[ri], W / 2, H / 2 + 4, { color: '#bfc0cc', size: 9, align: 'center', weight: '700' });
-      const nm = hard ? 'DUUGU  &  GAB' : 'duugu & gab';
-      GFX.text(nm, W / 2, H / 2 + 18, { color: '#f0e6d0', size: hard ? 14 : 12, align: 'center', weight: '700', shadowColor: '#500' });
+      const nm = hard ? 'DUUGU · GAB · TAKI' : 'duugu · gab · taki';
+      GFX.text(nm, W / 2, H / 2 + 18, { color: '#f0e6d0', size: hard ? 13 : 11, align: 'center', weight: '700', shadowColor: '#500' });
       ctx.restore();
 
       ctx.restore(); // shake
+
+      // gritty overlay — heavier as it builds
+      GFX.edge(this.frame, 0.7 + intensity * 0.6);
+      if (hard && beat > 0.6) { ctx.save(); ctx.globalAlpha = 0.12 * intensity; ctx.fillStyle = '#c81020'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
 
       // soundtrack credit (title/artist only — no lyrics)
       GFX.text("♪  'Down With the Sickness' — Disturbed", W / 2, H - 22, { color: 'rgba(210,210,220,' + (0.4 + 0.3 * Math.sin(now * 2)) + ')', size: 8, align: 'center' });
