@@ -102,7 +102,11 @@
       ];
       let audio = null;
       try {
-        audio = new global.Audio(CREDITS_SONG_SRC);
+        audio = new global.Audio();
+        // CORS-enable so a cross-origin song (e.g. raw.githubusercontent) isn't
+        // muted when routed through the analyser. Harmless for same-origin files.
+        try { audio.crossOrigin = 'anonymous'; } catch (e) {}
+        audio.src = CREDITS_SONG_SRC;
         audio.volume = 0.9;
         const p = audio.play();
         if (p && p.catch) p.catch(() => {});
