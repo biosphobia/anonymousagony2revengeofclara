@@ -479,16 +479,16 @@
     P({ say: 'Dr. Samson', text: "And this is why you're the only person here I trust, Annie." });
     P({ say: 'Annie', text: "Flattery. Charming. Fix your paperwork." });
     P({ remove: 'annie' });
-    // Enny
-    P({ narrate: ['And there was a boy.'], dur: 2400 });
-    P({ actor: 'enny', x: -10, y: G, dir: 'right', scale: 2.5, anim: 'joy' });
-    P({ move: 'enny', x: 96, dur: 1500 });
-    P({ say: 'Enny', text: "Hi! Hi. I'm Enny! They don't let me out much 'cause I look 'funny,' but you don't look scared of me. That's NEW." });
-    P({ say: 'Clara', text: "...you don't look funny. you look like a friend." });
-    P({ say: 'Enny', text: "A FRIEND?! oh boy oh boy. okay we're best friends now, no take-backs, it's the rules." });
+    // Gab
+    P({ narrate: ['And there was a kid in a hand-stitched hood.'], dur: 2600 });
+    P({ actor: 'gab', x: -10, y: G, dir: 'right', scale: 2.5, anim: 'joy' });
+    P({ move: 'gab', x: 96, dur: 1500 });
+    P({ say: 'Gab', text: "hewwo hewwo!! i'm Gab! ^w^ i'm a wolf-fox-dwagon, dey don't let me out much 'cause i'm 'too much' — but you don't wook scawed of me! dat's NEW!" });
+    P({ say: 'Clara', text: "...you're not too much. you look like a friend." });
+    P({ say: 'Gab', text: "a FWIEND?! *happy taiw go zoom* otay otay, best fwiends now, nyo take-backsies, dose awe da WUWES, uwu!" });
     P({ setAnim: 'clara', anim: 'joy' });
     P({ say: 'Clara', text: "...okay. ...no take-backs." });
-    P({ setAnim: 'clara', anim: null }); P({ remove: 'enny' });
+    P({ setAnim: 'clara', anim: null }); P({ remove: 'gab' });
     P({ narrate: ['It was the smallest light.', 'But after so much dark,', 'even the smallest light blinds you.'], dur: 4400 });
     P({ fade: 'out', dur: 1200 });
 
@@ -559,9 +559,9 @@
     P({ camera: { zoom: 1.25, y: -8 }, dur: 1200 });
     P({ actor: 'tung', x: C, y: G + 4, dir: 'down', scale: 3.4 });
     P({ flash: '#7a0e14', dur: 600 }); P({ shake: 7, dur: 900 });
-    P({ say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... sahuuur~ bambina Claraaa. three knock! tralalero tralala, you let me in again, si?" });
+    P({ say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... sahuuur~ bambina Claraaa. three knock! tralalero tralala, bombardiro crocodilo, lirilì larilà — the whole funny choir, back for you!" });
     P({ say: 'Clara', text: "...No. You're not at the door. You never were. You're in my head. You've been in my head since I was eleven." });
-    P({ say: 'Tung Tung Tung Sahur', text: "siii, in the head, in the walls, in the quiet! bombardiro crocodilo, I am your shame with a silly little voice — easier to keep that way, no?" });
+    P({ say: 'Tung Tung Tung Sahur', text: "siii, in the head, in the walls, in the songs! that's the genius, piccolina — wrap a monster in cartoons and the child blames herself for laughing~" });
     P({ setAnim: 'clara', anim: 'shake' });
     P({ say: 'Clara', text: "...Haze would hate this. He'd say don't you DARE flinch at a cartoon." });
     P({ setAnim: 'clara', anim: null }); P({ face: 'clara', dir: 'right' });

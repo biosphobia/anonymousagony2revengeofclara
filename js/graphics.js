@@ -588,6 +588,14 @@
       } else if (key === 'samson') {
         this.ellipse(cx, cy - r * 0.6, r * 1.0, r * 0.6, hair);
         this.roundRect(cx - r, cy - r * 0.6, r * 0.35, r * 1.1, r * 0.15, hair); this.roundRect(cx + r * 0.65, cy - r * 0.6, r * 0.35, r * 1.1, r * 0.15, hair);
+      } else if (key === 'gab') {
+        // furry hood + ears
+        this._rrPath(cx - r * 1.05, cy - r * 1.0, r * 2.1, r * 1.5, r * 0.6); ctx.fillStyle = hair; ctx.fill();
+        ctx.beginPath(); ctx.moveTo(cx - r * 1.0, cy - r * 0.7); ctx.lineTo(cx - r * 1.3, cy - r * 1.6); ctx.lineTo(cx - r * 0.5, cy - r * 1.0); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(cx + r * 1.0, cy - r * 0.7); ctx.lineTo(cx + r * 1.3, cy - r * 1.6); ctx.lineTo(cx + r * 0.5, cy - r * 1.0); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = lerpHex2(hair, '#ffffff', 0.4);
+        ctx.beginPath(); ctx.moveTo(cx - r * 0.95, cy - r * 0.85); ctx.lineTo(cx - r * 1.12, cy - r * 1.4); ctx.lineTo(cx - r * 0.65, cy - r * 1.0); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(cx + r * 0.95, cy - r * 0.85); ctx.lineTo(cx + r * 1.12, cy - r * 1.4); ctx.lineTo(cx + r * 0.65, cy - r * 1.0); ctx.closePath(); ctx.fill();
       } else {
         this.ellipse(cx, cy - r * 0.55, r * 1.05, r * 0.85, hair);
       }

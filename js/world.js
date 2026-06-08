@@ -198,7 +198,7 @@
       const f = (Math.floor(this.animFrame / 40) + n.x) % 8 === 0 ? 1 : 0;
       GFX.drawChar(n.x * TILE - this.camX, n.y * TILE - this.camY, cfg, n.dir || 'down', 0, { walking: false });
       // small "!" marker for the key story NPCs to nudge the player
-      if (n.script && ['samson', 'haze', 'tung', 'annie', 'enny'].includes(n.script)) {
+      if (n.script && ['samson', 'haze', 'tung', 'annie', 'gab'].includes(n.script)) {
         if (this.animFrame % 80 < 40)
           GFX.text('!', n.x * TILE - this.camX + 7, n.y * TILE - this.camY - 8, { color: '#f0d860', size: 8 });
       }

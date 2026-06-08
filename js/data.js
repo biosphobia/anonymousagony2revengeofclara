@@ -25,7 +25,8 @@
     annie:    { skin:'#e3bd97', hair:'#4a352a', style:'long',  shirt:'#2f8a8a', pants:'#236a6a' },
     mother:   { skin:'#e0b890', hair:'#6a4a6a', style:'long',  shirt:'#7a4a52', pants:'#3a2c34' },
     father:   { skin:'#cf9e72', hair:'#3a3530', style:'bald',  shirt:'#5a5240', pants:'#2c2a24' },
-    enny:     { skin:'#dfe1e6', hair:'#cfc9b8', style:'short', shirt:'#bcd0cf', pants:'#9aa6ad' },
+    gab:      { skin:'#e8c4a0', hair:'#5a3a6a', style:'hood',  shirt:'#6a3f8a', pants:'#3a2c46' },
+    taki:     { skin:'#d8b48c', hair:'#3a2e22', style:'short', shirt:'#5a7a4a', pants:'#3a3a2c' },
     craig:    { skin:'#d2a878', hair:'#2e2a26', style:'short', shirt:'#28324c', pants:'#1c2334' },
     samsonp:  { skin:'#d8b890', hair:'#b8bcc4', style:'short', shirt:'#cfd2da', pants:'#33384a' },
     tung:     { skin:'#b07d33', hair:'#6e4a1f', style:'hood',  shirt:'#8a5e26', pants:'#5e3f18' }
@@ -104,6 +105,7 @@
       npcs: [ { id: 'haze', x: 19, y: 3, dir: 'down', char: 'haze', name: 'Haze', script: 'haze' } ],
       objects: [
         { id: 'photo',  x: 5,  y: 1,  look: 'photo' },     // family photo on the north wall
+        { id: 'scrawls', x: 2, y: 1,  look: 'scrawls' },    // crayon brainrot graffiti
         { id: 'fridge', x: 2,  y: 2,  look: 'fridge' },
         { id: 'ktable', x: 4,  y: 7,  look: 'table' },
         { id: 'laptop', x: 20, y: 3,  look: 'laptop' },     // Haze's desk (top-right)
@@ -136,9 +138,10 @@
         { x: 12, y: 14, to: 'house', tx: 12, ty: 15, dir: 'down' }
       ],
       npcs: [
-        { id: 'samson', x: 12, y: 5,  dir: 'down', char: 'samson', name: 'Dr. Samson', script: 'samson' },
-        { id: 'annie',  x: 4,  y: 8,  dir: 'right', char: 'annie',  name: 'Annie',     script: 'annie' },
-        { id: 'enny',   x: 19, y: 9,  dir: 'left',  char: 'enny',   name: 'Enny',      script: 'enny' }
+        { id: 'samson', x: 12, y: 5,  dir: 'down',  char: 'samson', name: 'Dr. Samson', script: 'samson' },
+        { id: 'annie',  x: 4,  y: 8,  dir: 'right', char: 'annie',  name: 'Annie',      script: 'annie' },
+        { id: 'gab',    x: 19, y: 9,  dir: 'left',  char: 'gab',    name: 'Gab',        script: 'gab' },
+        { id: 'taki',   x: 8,  y: 11, dir: 'down',  char: 'taki',   name: 'Taki',       script: 'taki' }
       ],
       objects: [
         { id: 'bed1', x: 2, y: 4, look: 'bed' },
@@ -188,7 +191,7 @@
 
   const SPEAKER_PORTRAITS = {
     'Clara': 'clara', 'Haze': 'haze', 'Dr. Samson': 'samson', 'Mother': 'mother', 'Father': 'father',
-    'Annie': 'annie', 'Enny': 'enny', 'Officer Craig': 'craig', 'Craig': 'craig',
+    'Annie': 'annie', 'Gab': 'gab', 'Taki': 'taki', 'Officer Craig': 'craig', 'Craig': 'craig',
     'Tung Tung Tung Sahur': 'tung', 'Neighbor': 'woman', '???': null
   };
 
@@ -215,8 +218,14 @@
     // ---- house ----
     house_enter: () => ([
       { say: null, text: "The door clicks shut behind you. The air is thick, like a held breath." },
-      { say: 'Clara', text: "It's exactly how it was. Down to the dust. That's... not possible." },
-      { say: null, text: "(Look around. The family photo, the laptop, the clock. And Haze is in his room.)" }
+      { say: null, text: "From somewhere in the walls, a soft, sing-song chorus: \"tralalero... bombardiro... tung tung tung...\"" },
+      { say: 'Clara', text: "...That noise again. It's exactly how it was. Down to the dust, down to the stupid little song. That's not possible." },
+      { say: null, text: "(Look around. The photo, the crayon scrawls, the laptop, the clock. And Haze is in his room.)" }
+    ]),
+    scrawls: () => ([
+      { say: null, text: "Crayon scrawls climb the wall, layered for years — names a kid would chant to drown out a worse sound." },
+      { say: null, text: "TRALALERO TRALALA. BOMBARDIRO CROCODILO. LIRILÌ LARILÀ. BRR BRR PATAPIM. TUNG TUNG TUNG SAHUR. Pressed so hard the wax tore the paper." },
+      { say: 'Clara', text: "...I made the silly little monsters louder so I'd never have to hear the real one. I filled every quiet inch with nonsense. Smart kid." }
     ]),
     haze: (ctx) => {
       if (ctx.flags.haze_truth) return [
@@ -249,10 +258,10 @@
       if (ctx.flags.laptop_seen) return [ { say: null, text: "The screen still glows. A chat window with someone who was never really my friend." } ];
       return [
         { say: null, text: "My old laptop. Still logged in. The chat window blinks awake on its own." },
-        { say: 'Tung Tung Tung Sahur', text: "tung tung tung~ ciao bambina! you remember me? tralalero tralala, your bestest friend from the screen!" },
-        { say: 'Tung Tung Tung Sahur', text: "so nice, so patient, so many secrets we keep, no? bombardiro crocodilo... open the door for me, piccolina, you always do~" },
-        { say: 'Clara', text: "...You were never a friend. You were a grown man with a clown's voice and a kid's screen name rotting in your teeth." },
-        { say: 'Clara', text: "And I was eleven, you son of a bitch." },
+        { say: 'Tung Tung Tung Sahur', text: "tung tung tung~ ciao bambina! you remember me? tralalero tralala! bombardiro crocodilo! your bestest funny fwiends from the screen!" },
+        { say: 'Tung Tung Tung Sahur', text: "i wore so many silly faces for you, lirilì larilà~ a shark, a crocodile, a little drum-man — anything to make you giggle and click and keep the SECRET, si?" },
+        { say: 'Clara', text: "...That was the whole trick. Hide a grown man behind a parade of cartoon animals so an eleven-year-old wouldn't run." },
+        { say: 'Clara', text: "You were never my friend. You were never a tralalero anything. You were a son of a bitch with a clown's voice and a kid's screen name rotting in your teeth." },
         { setFlag: 'laptop_seen', value: true }
       ];
     },
@@ -296,7 +305,7 @@
         { say: 'Clara', text: "...Built it? What do you—" },
         { say: 'Dr. Samson', text: "A memory house. We walk through the worst day on purpose, room by room, until it can't ambush you anymore. You've been doing the work for years." },
         { say: 'Clara', text: "Then why does it still feel like he's right behind me?" },
-        { say: 'Dr. Samson', text: "Because you keep leaving one room locked. You know the one. ...Talk to Annie. Talk to Enny. Then go open it." },
+        { say: 'Dr. Samson', text: "Because you keep leaving one room locked. You know the one. ...Talk to Annie. Talk to little Gab. Then go open it." },
         { setFlag: 'samson_told', value: true }
       ];
     },
@@ -312,13 +321,16 @@
       { say: 'Annie', text: "He gave you a hundred notes, hon. You memorized every one. That's grief. That's love. That's not a ghost." },
       { setFlag: 'haze_truth', value: true }
     ],
-    enny: (ctx) => ctx.flags.haze_truth ? [
-      { say: 'Enny', text: "You can do the scary room, Clara! We practiced being brave, remember? No take-backs!" },
+    gab: (ctx) => ctx.flags.haze_truth ? [
+      { say: 'Gab', text: "you can do da scawy woom, Cwawa! *puts smol paw on youw shouldew* we pwacticed bein' bwave, wemembew? nyo take-backsies! >w<" },
+      { say: 'Gab', text: "and hey — da funny scawy fwiends in da waww? dey not weal monstews. dey just a costume da weal baddie wears. you can wook wight thwough 'em now. rawr! >:3" },
       { setFlag: 'hospital_done', value: true },
       { say: null, text: "(You feel ready. Go home — and open your old room.)" }
     ] : [
-      { say: 'Enny', text: "Clara! Clara! It's me, Enny, your bestest friend that isn't a screen-liar! ...Talk to Annie first, okay? She's got the sad part." }
+      { say: 'Gab', text: "hewwo hewwo!! i'm Gab! ^w^ i'm a wolf-fox-dwagon, it's vewy compwicated, do nyot ask. you smell nice — fwiend-nice, not scawy-nice!" },
+      { say: 'Gab', text: "you got dat sad wook, like befowe a big talk. go see Miss Annie fiwst, otay? *wags taiw nehvouswy* den come back an' we be bwave togethew, uwu" }
     ],
+    taki: () => { const p = ["Poop.", "Poop!", "...Poop?", "Poop. Poop.", "Poop."]; return [{ say: 'Taki', text: p[Math.floor(Math.random() * p.length)] }]; },
 
     // ---- the room (climax) ----
     room_enter: () => ([
@@ -330,7 +342,10 @@
       return [
         { say: 'Tung Tung Tung Sahur', text: "tung... tung... tung... sahuuur~ little Clara came home! tralalero tralala, did you bring me secrets?" },
         { say: 'Tung Tung Tung Sahur', text: "remember our game? you no tell, I no tell, bombardiro crocodilo! it was YOUR fault for opening the door, si? always your fault~" },
-        { say: 'Clara', text: "That's the trick, isn't it. The dumb little voice. The clown noises. You made it sound like a game so I'd think I chose it." },
+        { say: 'Tung Tung Tung Sahur', text: "SING with me, bambina, like the old nights! tralalero tralala~ lirilì larilà~ brr brr patapim~ loud loud LOUD so nobody hears what's underneath~" },
+        { say: null, text: "The corner erupts in cartoon noise — a shark, a crocodile, a hundred grinning little things, all braying at once to bury one quiet truth." },
+        { say: 'Clara', text: "That's the whole trick, isn't it. The dumb voices. The clown parade. You drown it in nonsense so a kid thinks it's a game she chose." },
+        { say: 'Clara', text: "I'm not eleven and deafened anymore. I can hear myself right under all of it now." },
         { choice: "He's waiting. What does Clara say?", who: 'Clara', options: [
           { label: "\"It was my fault. I let you in.\"", events: [
             { say: 'Tung Tung Tung Sahur', text: "siii! brava! tung tung tung, good girl, you keep the blame, you keep ME~" },
@@ -357,10 +372,12 @@
       ];
       return [
         { say: 'Clara', text: "I was ELEVEN. You were the grown-up. You were the predator. The shame was always yours — I just hauled it around for twelve years because I was small and you were heavy." },
+        { say: 'Clara', text: "And the songs? The tralalero, the bombardiro, the tung-tung-tung? That's not power. That's a coward hiding behind cartoons so a child won't scream." },
+        { say: 'Tung Tung Tung Sahur', text: "no — no, bambina, SING, lirilì larilà, tung tung tung tung—" },
+        { say: 'Clara', text: "No. The song's over. I can finally hear the silence, and the silence isn't yours either." },
         { say: 'Clara', text: "Haze made sure you and every animal like you got buried where you couldn't crawl back out. It cost him his whole life. I am NOT wasting that flinching at a wooden clown." },
-        { say: 'Tung Tung Tung Sahur', text: "t-tung...? tralale...ro...? bambina, no, we have a GAME, we have a—" },
-        { say: 'Clara', text: "Game's over. Get the hell out of my head." },
-        { sfx: 'knock' }, { flash: '#ffffff', dur: 700 }, { shake: 6, dur: 800 },
+        { say: 'Clara', text: "Get the hell out of my head." },
+        { sfx: 'knock' }, { flash: '#ffffff', dur: 700 }, { shake: 7, dur: 900 },
         { setFlag: 'tung_done', value: true },
         { ending: true }
       ];
