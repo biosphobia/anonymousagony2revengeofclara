@@ -91,7 +91,7 @@ sandbox.window = sandbox;
 
 // ---- Load engine files in order ----
 const ctx = vm.createContext(sandbox);
-const files = ['data.js', 'audio.js', 'input.js', 'graphics.js', 'dialogue.js', 'battle.js', 'world.js', 'game.js', 'main.js'];
+const files = ['data.js', 'audio.js', 'input.js', 'graphics.js', 'dialogue.js', 'battle.js', 'world.js', 'cinematic.js', 'game.js', 'main.js'];
 for (const f of files) {
   const code = fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8');
   vm.runInContext(code, ctx, { filename: f });

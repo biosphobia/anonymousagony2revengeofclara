@@ -61,6 +61,11 @@
     innkeep:  { skin:'#e0b78e', hair:'#7a5a3a', style:'short', shirt:'#b0c0d0', pants:'#4a5a6a' },
     villager: { skin:'#dcb389', hair:'#43321f', style:'short', shirt:'#566b7a', pants:'#2c343a' },
     soldier:  { skin:'#c99c70', hair:'#2a2a2a', style:'helm',  shirt:'#3a4452', pants:'#2c2c34' },
+    craig:    { skin:'#d2a878', hair:'#2e2a26', style:'short', shirt:'#28324c', pants:'#1c2334' },
+    enny:     { skin:'#dfe1e6', hair:'#cfc9b8', style:'short', shirt:'#bcd0cf', pants:'#9aa6ad' },
+    annie:    { skin:'#e3bd97', hair:'#4a352a', style:'long',  shirt:'#2f8a8a', pants:'#236a6a' },
+    mother:   { skin:'#e0b890', hair:'#6a4a6a', style:'long',  shirt:'#7a4a52', pants:'#3a2c34' },
+    father:   { skin:'#cf9e72', hair:'#3a3530', style:'bald',  shirt:'#5a5240', pants:'#2c2a24' },
     tralalero:{ skin:'#3f74b0', hair:'#2b568c', style:'short', shirt:'#3f74b0', pants:'#22406a' },
     herald:   { skin:'#9a6b2f', hair:'#5e3f18', style:'hood',  shirt:'#7a5223', pants:'#5a3c18' },
     tung:     { skin:'#b07d33', hair:'#6e4a1f', style:'hood',  shirt:'#8a5e26', pants:'#5e3f18' },
@@ -691,7 +696,9 @@
     'Clara': 'clara', 'Haze': 'haze', 'Dr. Samson': 'samson',
     'Tung Tung Tung Sahur': 'tung', 'Tralalero Tralala': 'tralalero', 'The Hollow Herald': 'herald',
     'Neighbor': 'woman', 'Kid': 'child', 'Night Nurse': 'innkeep', 'Clerk': 'merchant',
-    'Townsfolk': 'villager', 'Watchman': 'soldier'
+    'Townsfolk': 'villager', 'Watchman': 'soldier',
+    'Mother': 'mother', 'Father': 'father', 'Annie': 'annie', 'Enny': 'enny',
+    'Officer Craig': 'craig', 'Craig': 'craig'
   };
 
   // ---------------------------------------------------------------------------

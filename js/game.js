@@ -6,7 +6,8 @@
   'use strict';
 
   const DATA = global.DATA, GFX = global.GFX, Input = global.Input, Sound = global.Sound,
-        World = global.World, Battle = global.Battle, Dialogue = global.Dialogue, Menu = global.Menu;
+        World = global.World, Battle = global.Battle, Dialogue = global.Dialogue, Menu = global.Menu,
+        Cinematic = global.Cinematic;
 
   const SAVE_KEY = 'aa2_clara_save_v1';
   function rint(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
@@ -96,11 +97,11 @@
     // -----------------------------------------------------------------
     // New game / save / load
     // -----------------------------------------------------------------
-    newGame() {
+    _newGameState() {
       this.state = {
         map: 'village',
         flags: {},
-        triggersDone: {},
+        triggersDone: { 'village:intro': true }, // the animated cinematic replaces the in-world intro
         items: { potion: 1, bandage: 2 },
         gold: 0,
         party: [this.makeMember('clara', 1)]
@@ -108,10 +109,24 @@
       const m = DATA.MAPS.village;
       World.loadMap('village', m.start.x, m.start.y, m.start.dir);
       this.locTimer = 150;
+    },
+
+    // New game = play the long animated opening, then drop into Maple Street.
+    newGame() {
+      this._newGameState();
+      this.startIntro();
+    },
+
+    startIntro() {
+      this.mode = 'cinematic';
       this.fadeAlpha = 0;
-      // intro plays immediately; mark its trigger consumed
-      this.state.triggersDone['village:intro'] = true;
-      this.runScript('intro');
+      Cinematic.play(() => {
+        this.mode = 'explore';
+        this.fadeAlpha = 1; this.fadeTarget = 0; this.fadeSpeed = 0.04; this._fadeInQueued = true;
+        this.locTimer = 200;
+        this.toast = { text: 'Talk to Dr. Samson', timer: 220 };
+        this.save();
+      });
     },
 
     save() {
@@ -166,8 +181,8 @@
         x: 88, y: 128, w: 80, rowH: 14, items,
         onSelect: (it) => {
           Sound.resume();
-          if (it.value === 'new') { this.fadeOutThen(() => { this.mode = 'explore'; this.newGame(); }, true); }
-          else { this.fadeOutThen(() => { if (!this.load()) { this.mode = 'explore'; this.newGame(); } }, true); }
+          if (it.value === 'new') { this.fadeOutThen(() => { this.newGame(); }, true); }
+          else { this.fadeOutThen(() => { if (!this.load()) { this.newGame(); } }, true); }
         }
       });
     },
@@ -420,6 +435,7 @@
 
       switch (this.mode) {
         case 'title': this.titleMenu.update(); break;
+        case 'cinematic': Cinematic.update(1000 / 60); break;
         case 'explore': this._updateExplore(); break;
         case 'transition': this._updateTransition(); break;
         case 'cutscene': this._updateCutscene(); break;
@@ -527,6 +543,7 @@
       GFX.beginFrame();
       switch (this.mode) {
         case 'title': this._renderTitle(); break;
+        case 'cinematic': Cinematic.render(); break;
         case 'battle': Battle.render(); break;
         case 'gameover': this._renderGameOver(); break;
         case 'credits': this._renderCredits(); break;

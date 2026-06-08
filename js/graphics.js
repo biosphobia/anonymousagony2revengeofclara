@@ -269,6 +269,14 @@
     // --------------------------------------------------------------------
     drawChar(px, py, cfg, dir, frame, opt) {
       opt = opt || {};
+      if (opt.scale && opt.scale !== 1) {
+        const s = opt.scale, c = this.ctx;
+        c.save(); c.translate(px, py); c.scale(s, s);
+        const o = Object.assign({}, opt, { scale: 1 });
+        this.drawChar(0, 0, cfg, dir, frame, o);
+        c.restore();
+        return;
+      }
       const ctx = this.ctx;
       const walking = opt.walking;
       const phase = walking ? Math.sin(frame * 1.6) : 0;
